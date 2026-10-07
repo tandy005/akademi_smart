@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDatabaseAsync, saveDatabaseAsync } from '@/lib/storage';
 import { Member } from '@/lib/types';
+import { requireAuth } from '@/lib/auth-session';
 
 export async function GET() {
   const db = await getDatabaseAsync();
@@ -9,6 +10,14 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const auth = await requireAuth(['ADMIN', 'COACH']);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { error: auth.errorResponse?.error || 'Akses ditolak' },
+        { status: auth.errorResponse?.status || 403 }
+      );
+    }
+
     const body: Partial<Member> = await req.json();
     const db = await getDatabaseAsync();
 
@@ -72,6 +81,14 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+    const auth = await requireAuth(['ADMIN', 'COACH']);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { error: auth.errorResponse?.error || 'Akses ditolak' },
+        { status: auth.errorResponse?.status || 403 }
+      );
+    }
+
     const body: Member = await req.json();
     const db = await getDatabaseAsync();
 
@@ -113,6 +130,14 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const auth = await requireAuth(['ADMIN', 'COACH']);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { error: auth.errorResponse?.error || 'Akses ditolak' },
+        { status: auth.errorResponse?.status || 403 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'ID is required' }, { status: 400 });

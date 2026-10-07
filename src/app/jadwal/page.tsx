@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRole } from '@/context/RoleContext';
 import {
@@ -15,8 +15,10 @@ import {
   CheckCircle2,
   AlertCircle,
   ClipboardCheck,
+  Search,
+  Filter,
 } from 'lucide-react';
-import { TrainingSchedule, Member, AgeCategory } from '@/lib/types';
+import { TrainingSchedule, Member, AgeCategory, AttendanceRecord } from '@/lib/types';
 import ReminderModal from '@/components/ReminderModal';
 import {
   PageHeader,
@@ -31,9 +33,14 @@ export default function JadwalPage() {
   const { role } = useRole();
   const [schedules, setSchedules] = useState<TrainingSchedule[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedScheduleForReminder, setSelectedScheduleForReminder] =
     useState<TrainingSchedule | null>(null);
+
+  // Tab & Filter State
+  const [activeTab, setActiveTab] = useState<'UPCOMING' | 'PAST' | 'ALL'>('UPCOMING');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,12 +65,14 @@ export default function JadwalPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [schRes, memRes] = await Promise.all([
+      const [schRes, memRes, attRes] = await Promise.all([
         fetch('/api/schedules'),
         fetch('/api/members'),
+        fetch('/api/attendance'),
       ]);
       if (schRes.ok) setSchedules(await schRes.json());
       if (memRes.ok) setMembers(await memRes.json());
+      if (attRes.ok) setAttendances(await attRes.json());
     } catch (err) {
       console.error('Failed to load schedules:', err);
     } finally {
@@ -101,13 +110,14 @@ export default function JadwalPage() {
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Hapus jadwal "${title}"?`)) return;
+    if (!confirm(`Hapus jadwal "${title}"? Sesi absensi terkait juga akan dibersihkan.`)) return;
     try {
       const res = await fetch(`/api/schedules?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
         fetchData();
       } else {
-        alert('Gagal menghapus jadwal');
+        const d = await res.json();
+        alert(d.error || 'Gagal menghapus jadwal');
       }
     } catch {
       alert('Terjadi kesalahan jaringan');
@@ -116,8 +126,13 @@ export default function JadwalPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.date || !formData.startTime || !formData.location) {
-      setErrorMsg('Harap lengkapi semua kolom wajib');
+    if (!formData.title?.trim() || !formData.date || !formData.startTime || !formData.endTime || !formData.location?.trim()) {
+      setErrorMsg('Harap lengkapi semua kolom wajib (Judul, Tanggal, Jam, dan Lokasi)');
+      return;
+    }
+
+    if (formData.startTime >= formData.endTime) {
+      setErrorMsg('Jam selesai latihan harus lebih akhir dari jam mulai (contoh: 16:00 - 18:00)');
       return;
     }
 
@@ -153,8 +168,8 @@ export default function JadwalPage() {
         }
       }
     } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      setErrorMsg(errorMsg);
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMsg(msg);
     } finally {
       setFormSubmitting(false);
     }
@@ -162,14 +177,74 @@ export default function JadwalPage() {
 
   const now = new Date();
 
+  // Helper check status for each schedule
+  const getScheduleMeta = (s: TrainingSchedule) => {
+    const startDt = new Date(`${s.date}T${s.startTime}`);
+    const endDt = new Date(`${s.date}T${s.endTime}`);
+    const diffMs = startDt.getTime() - now.getTime();
+    const diffHours = Math.round((diffMs / (1000 * 60 * 60)) * 10) / 10;
+
+    const isPast = now.getTime() > endDt.getTime();
+    const isOngoing = now.getTime() >= startDt.getTime() && now.getTime() <= endDt.getTime();
+    const isWithin4Hours = !isPast && !isOngoing && diffHours >= 0 && diffHours <= 4.2;
+
+    const attendedCount = attendances.filter((a) => a.scheduleId === s.id).length;
+
+    return {
+      startDt,
+      endDt,
+      diffHours,
+      isPast,
+      isOngoing,
+      isWithin4Hours,
+      attendedCount,
+    };
+  };
+
+  // Filtered schedules based on activeTab and search
+  const filteredSchedules = useMemo(() => {
+    return schedules
+      .filter((s) => {
+        const meta = getScheduleMeta(s);
+
+        if (activeTab === 'UPCOMING') {
+          if (meta.isPast) return false;
+        } else if (activeTab === 'PAST') {
+          if (!meta.isPast) return false;
+        }
+
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          const matchTitle = s.title.toLowerCase().includes(q);
+          const matchCoach = s.coachName.toLowerCase().includes(q);
+          const matchLoc = s.location.toLowerCase().includes(q);
+          const matchFocus = s.focusMaterial.toLowerCase().includes(q);
+          return matchTitle || matchCoach || matchLoc || matchFocus;
+        }
+
+        return true;
+      })
+      .sort((a, b) => {
+        if (activeTab === 'PAST') {
+          // Newest past first
+          return `${b.date}T${b.startTime}`.localeCompare(`${a.date}T${a.startTime}`);
+        }
+        // Upcoming closest first
+        return `${a.date}T${a.startTime}`.localeCompare(`${b.date}T${b.startTime}`);
+      });
+  }, [schedules, activeTab, searchQuery, attendances]);
+
+  const upcomingCount = schedules.filter((s) => !getScheduleMeta(s).isPast).length;
+  const pastCount = schedules.filter((s) => getScheduleMeta(s).isPast).length;
+
   return (
     <div className="space-y-6">
-      {/* Reusable PageHeader */}
+      {/* PageHeader */}
       <PageHeader
         badgeText="Jadwal & Sesi Latihan"
         badgeIcon={<CalendarDays className="w-3.5 h-3.5" />}
-        title="Jadwal Latihan & Pengingat 4 Jam"
-        subtitle="Sistem otomatis mengirim WhatsApp reminder ke atlet dan orang tua 4 jam sebelum latihan dimulai"
+        title="Jadwal Latihan & Pengingat Sesi"
+        subtitle="Manajemen jadwal sesi latihan bola voli, pemantauan otomatis H-4 jam, dan pencatatan absensi"
         actions={
           role !== 'MEMBER' && (
             <Button
@@ -178,13 +253,13 @@ export default function JadwalPage() {
               onClick={openAddModal}
               icon={<Plus className="w-4 h-4" />}
             >
-              Tambah Jadwal Latihan
+              Tambah Jadwal Baru
             </Button>
           )
         }
       />
 
-      {/* Auto Reminder Info Box with Smart Red/Maroon theme */}
+      {/* Auto Reminder Info Box */}
       <div className="p-5 rounded-2xl bg-gradient-to-r from-[#7A0000]/40 via-[#260303] to-[#120101] border border-smart-red/40 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs shadow-md">
         <div className="flex items-center gap-3.5">
           <div className="w-11 h-11 rounded-xl bg-smart-red/20 text-smart-gold-light border border-smart-red/40 flex items-center justify-center flex-shrink-0">
@@ -196,34 +271,86 @@ export default function JadwalPage() {
             </div>
             <div className="text-slate-300 leading-relaxed mt-0.5 max-w-2xl">
               Setiap sesi latihan yang dijadwalkan akan otomatis dimonitor. Ketika waktu latihan
-              berjarak &le; 4 jam dari waktu saat ini, sistem akan otomatis mengirim notifikasi
-              pengingat ke nomor WhatsApp atlet dan wali murid yang bersangkutan.
+              berjarak &le; 4 jam dari waktu saat ini, sistem siap mengirim notifikasi pengingat ke nomor
+              WhatsApp atlet secara terkoordinasi.
             </div>
           </div>
         </div>
         <Link href="/reminder">
           <Button variant="outline" size="sm">
-            Konfigurasi Template WA &rarr;
+            Template & Pengaturan WA &rarr;
           </Button>
         </Link>
       </div>
 
+      {/* Tab Nav & Search Bar */}
+      <div className="p-4 rounded-2xl bg-smart-card border border-smart-border space-y-3 shadow-md">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          {/* Tabs */}
+          <div className="flex items-center gap-1.5 bg-smart-dark p-1 rounded-xl border border-smart-border text-xs">
+            <button
+              type="button"
+              onClick={() => setActiveTab('UPCOMING')}
+              className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer text-xs ${
+                activeTab === 'UPCOMING'
+                  ? 'bg-smart-gold text-smart-dark shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Mendatang ({upcomingCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('PAST')}
+              className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer text-xs ${
+                activeTab === 'PAST'
+                  ? 'bg-smart-gold text-smart-dark shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Selesai ({pastCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('ALL')}
+              className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer text-xs ${
+                activeTab === 'ALL'
+                  ? 'bg-smart-gold text-smart-dark shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Semua ({schedules.length})
+            </button>
+          </div>
+
+          {/* Search box */}
+          <div className="relative flex-1 md:max-w-xs">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <input
+              type="text"
+              placeholder="Cari judul, pelatih, materi..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-smart-dark border border-smart-border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-smart-gold transition"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Schedules List */}
       <div className="space-y-4">
-        {schedules.map((schedule) => {
-          const scheduleDateTime = new Date(`${schedule.date}T${schedule.startTime}`);
-          const diffMs = scheduleDateTime.getTime() - now.getTime();
-          const diffHours = Math.round((diffMs / (1000 * 60 * 60)) * 10) / 10;
-          const isPast = diffHours < -2;
-          const isWithin4Hours = diffHours >= 0 && diffHours <= 4.2;
+        {filteredSchedules.map((schedule) => {
+          const meta = getScheduleMeta(schedule);
 
           return (
             <div
               key={schedule.id}
               className={`p-5 rounded-2xl border transition-all duration-200 shadow-md ${
-                isWithin4Hours
-                  ? 'bg-smart-card border-smart-red/70 ring-1 ring-smart-gold/40 shadow-smart-red/20'
-                  : isPast
+                meta.isOngoing
+                  ? 'bg-smart-card border-emerald-500/60 ring-1 ring-emerald-500/30 shadow-emerald-950/30'
+                  : meta.isWithin4Hours
+                  ? 'bg-smart-card border-smart-red/80 ring-1 ring-smart-gold/50 shadow-smart-red/20'
+                  : meta.isPast
                   ? 'bg-smart-card/50 border-smart-border/70 opacity-75'
                   : 'bg-smart-card border-smart-border hover:border-smart-border-light'
               }`}
@@ -236,21 +363,40 @@ export default function JadwalPage() {
                       {schedule.category}
                     </Badge>
 
-                    {isWithin4Hours && (
-                      <Badge variant="red" size="sm" dot={true} pulse={true}>
-                        Sesi &le; 4 Jam ({diffHours} jam lagi)
+                    {meta.isOngoing && (
+                      <Badge variant="green" size="sm" dot={true} pulse={true}>
+                        Sedang Berlangsung Sekarang
                       </Badge>
+                    )}
+
+                    {meta.isWithin4Hours && (
+                      <Badge variant="red" size="sm" dot={true} pulse={true}>
+                        Sesi Segera (&le; 4 Jam) &bull; {meta.diffHours} jam lagi
+                      </Badge>
+                    )}
+
+                    {meta.isPast && (
+                      <Badge variant="slate" size="sm">
+                        Selesai
+                      </Badge>
+                    )}
+
+                    {meta.attendedCount > 0 ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Absensi: {meta.attendedCount} Atlet
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+                        Belum Diabsen
+                      </span>
                     )}
 
                     {schedule.reminderSent ? (
                       <Badge variant="green" size="sm" dot={true}>
-                        Reminder WA Terkirim
+                        Reminder Terkirim
                       </Badge>
-                    ) : (
-                      <Badge variant="slate" size="sm">
-                        Belum Terkirim
-                      </Badge>
-                    )}
+                    ) : null}
                   </div>
 
                   <h3 className="text-lg font-bold text-white tracking-tight">{schedule.title}</h3>
@@ -280,8 +426,8 @@ export default function JadwalPage() {
                     </div>
                   </div>
 
-                  <div className="text-xs text-slate-400 pt-1">
-                    <strong className="text-smart-gold-light">Materi:</strong>{' '}
+                  <div className="text-xs text-slate-400 pt-0.5">
+                    <strong className="text-smart-gold-light">Materi Latihan:</strong>{' '}
                     {schedule.focusMaterial}
                   </div>
                 </div>
@@ -291,22 +437,24 @@ export default function JadwalPage() {
                   <div className="flex items-center gap-2">
                     <Link href={`/absensi?scheduleId=${schedule.id}`}>
                       <Button
-                        variant="secondary"
+                        variant={meta.attendedCount > 0 ? 'secondary' : 'primary'}
                         size="xs"
                         icon={<ClipboardCheck className="w-3.5 h-3.5" />}
                       >
-                        Absensi
+                        {meta.attendedCount > 0 ? 'Edit Absensi' : 'Catat Absensi'}
                       </Button>
                     </Link>
 
-                    <Button
-                      variant="primary"
-                      size="xs"
-                      onClick={() => setSelectedScheduleForReminder(schedule)}
-                      icon={<Send className="w-3.5 h-3.5" />}
-                    >
-                      Kirim Reminder WA
-                    </Button>
+                    {!meta.isPast && (
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={() => setSelectedScheduleForReminder(schedule)}
+                        icon={<Send className="w-3.5 h-3.5" />}
+                      >
+                        Reminder WA
+                      </Button>
+                    )}
                   </div>
 
                   {role !== 'MEMBER' && (
@@ -333,9 +481,19 @@ export default function JadwalPage() {
           );
         })}
 
-        {schedules.length === 0 && (
+        {filteredSchedules.length === 0 && !loading && (
           <div className="p-12 text-center text-slate-500 text-sm bg-smart-card rounded-2xl border border-smart-border">
-            Belum ada jadwal latihan. Klik tombol &quot;Tambah Jadwal Latihan&quot; di atas untuk membuat.
+            {activeTab === 'UPCOMING'
+              ? 'Tidak ada jadwal latihan mendatang. Klik "Tambah Jadwal Baru" untuk membuat sesi berikutnya.'
+              : activeTab === 'PAST'
+              ? 'Belum ada riwayat sesi latihan yang selesai.'
+              : 'Tidak ditemukan jadwal latihan yang sesuai filter.'}
+          </div>
+        )}
+
+        {loading && (
+          <div className="p-12 text-center text-slate-400 text-sm">
+            Memuat daftar jadwal latihan...
           </div>
         )}
       </div>
@@ -345,7 +503,7 @@ export default function JadwalPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingSchedule ? 'Edit Jadwal Latihan' : 'Buat Sesi Latihan Baru'}
-        subtitle="Akademi Smart Volleyball Club"
+        subtitle="Akademi Voly Smart 09"
         icon={<Plus className="w-4 h-4" />}
         maxWidth="xl"
       >
@@ -451,7 +609,7 @@ export default function JadwalPage() {
                 className="w-24 px-3 py-2 bg-smart-dark border border-smart-border rounded-xl text-white focus:outline-none focus:border-smart-gold font-mono"
               />
               <span className="text-slate-400">
-                Jam sebelum sesi (Sesuai kebutuhan: <strong>4 jam</strong> disarankan)
+                Jam sebelum sesi (Standar: <strong>4 jam</strong> sebelum latihan)
               </span>
             </div>
           </div>

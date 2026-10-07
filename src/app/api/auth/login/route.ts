@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { authenticateUser } from '@/lib/neon-db';
+import { createSessionToken, COOKIE_NAME, COOKIE_MAX_AGE } from '@/lib/auth-session';
 
 export async function POST(req: Request) {
   try {
@@ -21,7 +22,15 @@ export async function POST(req: Request) {
       );
     }
 
-    // Prepare response with secure session cookie
+    // Generate tamper-proof signed session token
+    const token = createSessionToken({
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      role: user.role,
+      memberId: user.memberId || null,
+    });
+
     const response = NextResponse.json({
       success: true,
       user: {
@@ -33,22 +42,14 @@ export async function POST(req: Request) {
       },
     });
 
-    const sessionPayload = Buffer.from(
-      JSON.stringify({
-        id: user.id,
-        username: user.username,
-        name: user.name,
-        role: user.role,
-        memberId: user.memberId || null,
-      })
-    ).toString('base64');
-
+    // Set signed secure HTTP-only cookie
     response.cookies.set({
-      name: 'vla_session',
-      value: sessionPayload,
-      httpOnly: false, // accessible to client for smooth state hydration
+      name: COOKIE_NAME,
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: COOKIE_MAX_AGE,
       sameSite: 'lax',
     });
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDatabaseAsync, saveDatabaseAsync } from '@/lib/storage';
 import { AttendanceRecord, AttendanceStatus } from '@/lib/types';
+import { requireAuth } from '@/lib/auth-session';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -17,6 +18,14 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const auth = await requireAuth(['ADMIN', 'COACH']);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { error: auth.errorResponse?.error || 'Akses ditolak' },
+        { status: auth.errorResponse?.status || 403 }
+      );
+    }
+
     const body: {
       scheduleId: string;
       records: Array<{ memberId: string; status: AttendanceStatus; notes?: string }>;
