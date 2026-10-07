@@ -1,4 +1,4 @@
-import { sql } from './neon';
+import { sql, hasDatabaseUrl } from './neon';
 import {
   Member,
   TrainingSchedule,
@@ -25,6 +25,29 @@ export interface DbUser {
 // 1. User authentication operations
 export async function authenticateUser(username: string, passwordPlain: string): Promise<DbUser | null> {
   const cleanUsername = username.trim().toLowerCase();
+  
+  if (!hasDatabaseUrl()) {
+    // Fallback demo users if Neon database has not yet been connected in Vercel
+    if (cleanUsername === 'admin' && (passwordPlain === 'admin123' || passwordPlain === 'admin')) {
+      return {
+        id: 'u-admin',
+        username: 'admin',
+        name: 'Pengurus / Admin',
+        role: 'ADMIN',
+        createdAt: new Date().toISOString(),
+      };
+    }
+    if (cleanUsername === 'pelatih' && (passwordPlain === 'coach123' || passwordPlain === 'pelatih')) {
+      return {
+        id: 'u-coach',
+        username: 'pelatih',
+        name: 'Head Coach',
+        role: 'COACH',
+        createdAt: new Date().toISOString(),
+      };
+    }
+    return null;
+  }
   
   // Find user by exact username or matched registration number
   const rows = await sql`
@@ -83,6 +106,28 @@ export async function authenticateUser(username: string, passwordPlain: string):
 }
 
 export async function getUserById(id: string): Promise<DbUser | null> {
+  if (!hasDatabaseUrl()) {
+    if (id === 'u-admin') {
+      return {
+        id: 'u-admin',
+        username: 'admin',
+        name: 'Pengurus / Admin',
+        role: 'ADMIN',
+        createdAt: new Date().toISOString(),
+      };
+    }
+    if (id === 'u-coach') {
+      return {
+        id: 'u-coach',
+        username: 'pelatih',
+        name: 'Head Coach',
+        role: 'COACH',
+        createdAt: new Date().toISOString(),
+      };
+    }
+    return null;
+  }
+
   const rows = await sql`
     SELECT id, username, name, role, member_id, created_at
     FROM users
@@ -102,6 +147,8 @@ export async function getUserById(id: string): Promise<DbUser | null> {
 }
 
 export async function getAllUsers(): Promise<DbUser[]> {
+  if (!hasDatabaseUrl()) return [];
+
   const rows = await sql`
     SELECT id, username, name, role, member_id, created_at
     FROM users
@@ -119,6 +166,9 @@ export async function getAllUsers(): Promise<DbUser[]> {
 
 // 2. Neon full database state fetcher
 export async function getNeonDatabase(): Promise<AppData> {
+  if (!hasDatabaseUrl()) {
+    throw new Error('DATABASE_URL is not configured');
+  }
   const [
     settingsRows,
     configRows,
@@ -292,6 +342,10 @@ export async function getNeonDatabase(): Promise<AppData> {
 
 // 3. Save / Sync database back to Neon
 export async function saveNeonDatabase(data: AppData): Promise<void> {
+  if (!hasDatabaseUrl()) {
+    return;
+  }
+
   // Update app settings
   await sql`
     INSERT INTO app_settings (id, academy_name, monthly_due_amount)

@@ -454,19 +454,30 @@ function seedDynamicDates(data: AppData) {
   }
 }
 
-function getDatabaseLocal(): AppData {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
+let memoryCache: AppData | null = null;
 
-  if (!fs.existsSync(DATA_FILE)) {
-    const clone = JSON.parse(JSON.stringify(INITIAL_DATA));
-    seedDynamicDates(clone);
-    fs.writeFileSync(DATA_FILE, JSON.stringify(clone, null, 2), 'utf-8');
-    return clone;
+function getDatabaseLocal(): AppData {
+  if (memoryCache) {
+    return memoryCache;
   }
 
   try {
+    if (!fs.existsSync(DATA_DIR)) {
+      try {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      } catch {}
+    }
+
+    if (!fs.existsSync(DATA_FILE)) {
+      const clone = JSON.parse(JSON.stringify(INITIAL_DATA));
+      seedDynamicDates(clone);
+      memoryCache = clone;
+      try {
+        fs.writeFileSync(DATA_FILE, JSON.stringify(clone, null, 2), 'utf-8');
+      } catch {}
+      return clone;
+    }
+
     const content = fs.readFileSync(DATA_FILE, 'utf-8');
     const parsed: AppData = JSON.parse(content);
     let changed = false;
@@ -475,23 +486,34 @@ function getDatabaseLocal(): AppData {
       changed = true;
     }
     if (changed) {
-      fs.writeFileSync(DATA_FILE, JSON.stringify(parsed, null, 2), 'utf-8');
+      try {
+        fs.writeFileSync(DATA_FILE, JSON.stringify(parsed, null, 2), 'utf-8');
+      } catch {}
     }
+    memoryCache = parsed;
     return parsed;
   } catch (error) {
-    console.error('Error reading database file, resetting to initial:', error);
+    console.warn('Local database read/reset error:', error);
     const clone = JSON.parse(JSON.stringify(INITIAL_DATA));
     seedDynamicDates(clone);
-    fs.writeFileSync(DATA_FILE, JSON.stringify(clone, null, 2), 'utf-8');
+    memoryCache = clone;
+    try {
+      fs.writeFileSync(DATA_FILE, JSON.stringify(clone, null, 2), 'utf-8');
+    } catch {}
     return clone;
   }
 }
 
 function saveDatabaseLocal(data: AppData): void {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  memoryCache = data;
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    // Vercel serverless has a read-only filesystem; memoryCache preserves data in memory
   }
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
 }
 
 export function getDatabase(): AppData {
