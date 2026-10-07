@@ -13,7 +13,7 @@ import {
   MapPin,
   Calendar,
 } from 'lucide-react';
-import { Member, MemberStatus, calculateMemberAge } from '@/lib/types';
+import { Member, MemberStatus, Gender, calculateMemberAge } from '@/lib/types';
 import { generateDirectWhatsAppUrl } from '@/lib/whatsapp-utils';
 import {
   PageHeader,
@@ -27,6 +27,7 @@ import {
 interface MemberFormState {
   name: string;
   age: string | number;
+  gender: Gender;
   phone: string;
   address: string;
   status: MemberStatus;
@@ -35,6 +36,7 @@ interface MemberFormState {
 const initialFormState: MemberFormState = {
   name: '',
   age: '',
+  gender: 'Putra',
   phone: '',
   address: '',
   status: 'Aktif',
@@ -45,6 +47,7 @@ export default function AnggotaPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGender, setSelectedGender] = useState<string>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
 
   // Modal State
@@ -53,7 +56,7 @@ export default function AnggotaPage() {
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Form State (Hanya: Nama, Umur, Nomor WA, Alamat, Status)
+  // Form State (Nama, Umur, Jenis Kelamin, Nomor WA, Alamat, Status)
   const [formData, setFormData] = useState<MemberFormState>(initialFormState);
 
   const fetchMembersList = async () => {
@@ -88,6 +91,7 @@ export default function AnggotaPage() {
     setFormData({
       name: m.name || '',
       age: ageVal > 0 ? ageVal : '',
+      gender: m.gender || 'Putra',
       phone: m.phone || '',
       address: m.address || '',
       status: m.status || 'Aktif',
@@ -127,6 +131,7 @@ export default function AnggotaPage() {
     const payload = {
       name: formData.name.trim(),
       age: formData.age !== '' ? Number(formData.age) : undefined,
+      gender: formData.gender,
       phone: formData.phone.trim(),
       address: formData.address.trim(),
       status: formData.status,
@@ -170,7 +175,7 @@ export default function AnggotaPage() {
     }
   };
 
-  // Filter members berdasarkan Nama, Nomor WA, Alamat, dan Status
+  // Filter members berdasarkan Nama, Nomor WA, Alamat, Gender, dan Status
   const filtered = members.filter((m) => {
     const q = searchQuery.toLowerCase().trim();
     const matchSearch =
@@ -179,9 +184,10 @@ export default function AnggotaPage() {
       (m.phone && m.phone.includes(q)) ||
       (m.address && m.address.toLowerCase().includes(q));
 
+    const matchGender = selectedGender === 'ALL' || m.gender === selectedGender;
     const matchStatus = selectedStatus === 'ALL' || m.status === selectedStatus;
 
-    return matchSearch && matchStatus;
+    return matchSearch && matchGender && matchStatus;
   });
 
   return (
@@ -191,7 +197,7 @@ export default function AnggotaPage() {
         badgeText="Manajemen Anggota"
         badgeIcon={<Users className="w-3.5 h-3.5" />}
         title="Daftar Anggota"
-        subtitle="Kelola data anggota: Nama, Umur, Nomor WhatsApp, Alamat, dan Status Keanggotaan"
+        subtitle="Kelola data anggota: Nama, Umur, Jenis Kelamin, Nomor WhatsApp, Alamat, dan Status"
         actions={
           role !== 'MEMBER' && (
             <Button
@@ -208,7 +214,7 @@ export default function AnggotaPage() {
 
       {/* Filter and Search Bar */}
       <div className="p-4 rounded-2xl bg-smart-card border border-smart-border space-y-3 shadow-md">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           {/* Search box */}
           <div className="sm:col-span-2 relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -219,6 +225,20 @@ export default function AnggotaPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-smart-dark border border-smart-border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-smart-gold transition"
             />
+          </div>
+
+          {/* Gender Filter */}
+          <div>
+            <select
+              value={selectedGender}
+              onChange={(e) => setSelectedGender(e.target.value)}
+              aria-label="Filter Jenis Kelamin"
+              className="w-full px-3 py-2 bg-smart-dark border border-smart-border rounded-xl text-xs text-slate-200 focus:outline-none focus:border-smart-gold"
+            >
+              <option value="ALL">Semua Gender</option>
+              <option value="Putra">Putra</option>
+              <option value="Putri">Putri</option>
+            </select>
           </div>
 
           {/* Status Filter */}
@@ -243,9 +263,10 @@ export default function AnggotaPage() {
             Menampilkan <strong className="text-white">{filtered.length}</strong> dari{' '}
             {members.length} anggota
           </span>
-          {(selectedStatus !== 'ALL' || searchQuery) && (
+          {(selectedGender !== 'ALL' || selectedStatus !== 'ALL' || searchQuery) && (
             <button
               onClick={() => {
+                setSelectedGender('ALL');
                 setSelectedStatus('ALL');
                 setSearchQuery('');
               }}
@@ -263,13 +284,14 @@ export default function AnggotaPage() {
           <table className="w-full text-left text-xs">
             <thead className="bg-smart-dark/80 text-slate-400 border-b border-smart-border font-semibold uppercase tracking-wider text-[11px]">
               <tr>
-                <th className="py-3.5 px-4 w-14 text-center">No</th>
+                <th className="py-3.5 px-4 w-12 text-center">No</th>
                 <th className="py-3.5 px-4">Nama</th>
-                <th className="py-3.5 px-4 w-28">Umur</th>
+                <th className="py-3.5 px-4 w-24">Umur</th>
+                <th className="py-3.5 px-4 w-28">Jenis Kelamin</th>
                 <th className="py-3.5 px-4">Nomor WA</th>
                 <th className="py-3.5 px-4">Alamat</th>
-                <th className="py-3.5 px-4 w-28">Status</th>
-                {role !== 'MEMBER' && <th className="py-3.5 px-4 text-right w-24">Aksi</th>}
+                <th className="py-3.5 px-4 w-24">Status</th>
+                {role !== 'MEMBER' && <th className="py-3.5 px-4 text-right w-20">Aksi</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-smart-border/60">
@@ -278,7 +300,7 @@ export default function AnggotaPage() {
                 const waUrl = m.phone
                   ? generateDirectWhatsAppUrl(
                       m.phone,
-                      `Halo ${m.name}, salam dari pengurus.`
+                      `Halo ${m.name}, salam dari pengurus Akademi Smart.`
                     )
                   : null;
 
@@ -311,11 +333,24 @@ export default function AnggotaPage() {
                       {age > 0 ? (
                         <span className="font-medium inline-flex items-center gap-1">
                           <Calendar className="w-3 h-3 text-smart-gold-light" />
-                          {age} Tahun
+                          {age} Thn
                         </span>
                       ) : (
                         <span className="text-slate-500">-</span>
                       )}
+                    </td>
+
+                    {/* Jenis Kelamin */}
+                    <td className="py-3.5 px-4">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${
+                          m.gender === 'Putri'
+                            ? 'bg-rose-500/10 text-rose-300 border-rose-500/30'
+                            : 'bg-blue-500/10 text-blue-300 border-blue-500/30'
+                        }`}
+                      >
+                        {m.gender || 'Putra'}
+                      </span>
                     </td>
 
                     {/* Nomor WA */}
@@ -399,12 +434,12 @@ export default function AnggotaPage() {
         </div>
       </div>
 
-      {/* Modal Tambah / Edit Anggota (HANYA: Nama, Umur, Nomor WA, Alamat, Status) */}
+      {/* Modal Tambah / Edit Anggota */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingMember ? 'Edit Data Anggota' : 'Tambah Anggota Baru'}
-        subtitle="Isi data anggota: Nama, Umur, Nomor WA, Alamat, dan Status"
+        subtitle="Isi data anggota: Nama, Umur, Jenis Kelamin, Nomor WA, Alamat, dan Status"
         icon={<UserPlus className="w-4 h-4" />}
         maxWidth="lg"
       >
@@ -426,16 +461,29 @@ export default function AnggotaPage() {
               placeholder="Contoh: Rivan Nurmulya"
             />
 
-            {/* 2. Umur */}
-            <FormInput
-              label="Umur (Tahun)"
-              type="number"
-              min="1"
-              max="100"
-              value={formData.age}
-              onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-              placeholder="Contoh: 17"
-            />
+            {/* 2. Umur & Jenis Kelamin (Grid 2 Kolom) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <FormInput
+                label="Umur (Tahun)"
+                type="number"
+                min="1"
+                max="100"
+                value={formData.age}
+                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                placeholder="Contoh: 17"
+              />
+
+              <FormSelect
+                label="Jenis Kelamin"
+                value={formData.gender}
+                onChange={(e) =>
+                  setFormData({ ...formData, gender: e.target.value as Gender })
+                }
+              >
+                <option value="Putra">Putra</option>
+                <option value="Putri">Putri</option>
+              </FormSelect>
+            </div>
 
             {/* 3. Nomor WA */}
             <FormInput
