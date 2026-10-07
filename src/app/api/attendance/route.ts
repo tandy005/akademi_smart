@@ -32,8 +32,8 @@ export async function POST(req: Request) {
     db.attendances = db.attendances.filter((a) => a.scheduleId !== body.scheduleId);
 
     const now = new Date().toISOString();
-    const newRecords: AttendanceRecord[] = body.records.map((r, i) => ({
-      id: `att-${Date.now()}-${i}`,
+    const newRecords: AttendanceRecord[] = body.records.map((r) => ({
+      id: `att-${body.scheduleId}-${r.memberId}`,
       scheduleId: body.scheduleId,
       memberId: r.memberId,
       status: r.status,

@@ -198,14 +198,22 @@ export async function getNeonDatabase(): Promise<AppData> {
     reminderHoursBefore: s.reminder_hours_before || 4,
   }));
 
-  const attendances: AttendanceRecord[] = attendancesRows.map((a: any) => ({
-    id: a.id,
-    scheduleId: a.schedule_id,
-    memberId: a.member_id,
-    status: a.status,
-    notes: a.notes ?? undefined,
-    recordedAt: a.recorded_at,
-  }));
+  const seenAttKeys = new Set<string>();
+  const attendances: AttendanceRecord[] = [];
+  for (const a of attendancesRows) {
+    const key = `${a.schedule_id}-${a.member_id}`;
+    if (!seenAttKeys.has(key)) {
+      seenAttKeys.add(key);
+      attendances.push({
+        id: a.id,
+        scheduleId: a.schedule_id,
+        memberId: a.member_id,
+        status: a.status,
+        notes: a.notes ?? undefined,
+        recordedAt: a.recorded_at,
+      });
+    }
+  }
 
   const dues: MonthlyDue[] = duesRows.map((d: any) => ({
     id: d.id,
