@@ -23,8 +23,8 @@ export default function LoginPage() {
   const { login } = useRole();
 
   const [selectedRole, setSelectedRole] = useState<'ADMIN' | 'MEMBER'>('ADMIN');
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,13 +34,8 @@ export default function LoginPage() {
   const handleRoleSelect = (role: 'ADMIN' | 'MEMBER') => {
     setSelectedRole(role);
     setErrorMessage('');
-    if (role === 'ADMIN') {
-      setUsername('');
-      setPassword('');
-    } else {
-      setUsername('');
-      setPassword('');
-    }
+    setUsername('');
+    setPassword('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -236,7 +231,8 @@ export default function LoginPage() {
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder={'Username'}
+                    placeholder={selectedRole === 'MEMBER' ? 'Masukkan username / NIS (contoh: smartari01)' : 'Masukkan username (contoh: admin)'}
+                    autoComplete="username"
                     className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#8F0000] focus:ring-2 focus:ring-[#8F0000]/15 transition font-medium"
                   />
                 </div>
@@ -257,6 +253,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Masukkan kata sandi"
+                    autoComplete="current-password"
                     className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#8F0000] focus:ring-2 focus:ring-[#8F0000]/15 transition font-medium"
                   />
                   <button
