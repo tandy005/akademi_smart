@@ -50,7 +50,7 @@ export default function KeuanganPage() {
   const [formData, setFormData] = useState<Partial<CashTransaction>>({
     type: 'EXPENSE',
     category: 'Sewa Lapangan',
-    amount: 150000,
+    amount: undefined,
     description: '',
     date: new Date().toISOString().split('T')[0],
     recordedBy: 'Bendahara Kas',
@@ -108,7 +108,7 @@ export default function KeuanganPage() {
         setFormData({
           type: 'EXPENSE',
           category: 'Sewa Lapangan',
-          amount: 150000,
+          amount: undefined,
           description: '',
           date: new Date().toISOString().split('T')[0],
           recordedBy: 'Bendahara Kas',
@@ -355,45 +355,28 @@ export default function KeuanganPage() {
             </div>
           )}
 
-          {/* Tipe Transaksi */}
-          <div>
-            <label className="block text-slate-300 font-semibold mb-1">Jenis Transaksi *</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData({ ...formData, type: 'INCOME', category: 'Pendaftaran' })
-                }
-                className={`py-2 px-3 rounded-xl border font-bold text-center transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                  formData.type === 'INCOME'
-                    ? 'bg-emerald-600/30 border-emerald-500 text-white shadow-sm'
-                    : 'bg-smart-dark border-smart-border text-slate-400 hover:bg-smart-card-hover'
-                }`}
-              >
-                <ArrowDownRight className="w-4 h-4 text-emerald-400" />
-                <span>Pemasukan (+)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData({ ...formData, type: 'EXPENSE', category: 'Sewa Lapangan' })
-                }
-                className={`py-2 px-3 rounded-xl border font-bold text-center transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                  formData.type === 'EXPENSE'
-                    ? 'bg-smart-red/30 border-smart-red text-white shadow-sm'
-                    : 'bg-smart-dark border-smart-border text-slate-400 hover:bg-smart-card-hover'
-                }`}
-              >
-                <ArrowUpRight className="w-4 h-4 text-red-400" />
-                <span>Pengeluaran (-)</span>
-              </button>
-            </div>
-          </div>
+          {/* Tipe Transaksi Dropdown */}
+          <FormSelect
+            label="Jenis Transaksi"
+            required
+            value={formData.type || 'EXPENSE'}
+            onChange={(e) => {
+              const newType = e.target.value as 'INCOME' | 'EXPENSE';
+              setFormData({
+                ...formData,
+                type: newType,
+                category: newType === 'INCOME' ? 'Pendaftaran' : 'Sewa Lapangan',
+              });
+            }}
+          >
+            <option value="EXPENSE">Pengeluaran Kas (-)</option>
+            <option value="INCOME">Pemasukan Kas (+)</option>
+          </FormSelect>
 
           <FormSelect
             label="Kategori"
             required
-            value={formData.category || 'Sewa Lapangan'}
+            value={formData.category || (formData.type === 'INCOME' ? 'Pendaftaran' : 'Sewa Lapangan')}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
           >
             {formData.type === 'INCOME' ? (
@@ -408,7 +391,7 @@ export default function KeuanganPage() {
             ) : (
               <>
                 <option value="Sewa Lapangan">Sewa Lapangan / GOR Latihan</option>
-                <option value="Peralatan/Bola">Pembelian Bola Voli / Net / Antena</option>
+                <option value="Peralatan">Pembelian Bola Voli / Net / Antena</option>
                 <option value="Honor Pelatih">Honor Pelatih / Pelatih Fisik</option>
                 <option value="Konsumsi">Konsumsi Air Minum & Snack Latihan</option>
                 <option value="P3K">Medis P3K, Kinesio Tape & Es</option>
@@ -423,9 +406,17 @@ export default function KeuanganPage() {
             type="number"
             required
             min="1000"
-            value={formData.amount || ''}
-            onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-            placeholder="Contoh: 250000"
+            value={formData.amount !== undefined && formData.amount !== null ? formData.amount : ''}
+            onChange={(e) => {
+              const val = e.target.value;
+              setFormData({ ...formData, amount: val === '' ? undefined : Number(val) });
+            }}
+            placeholder="0"
+            helperText={
+              formData.amount && formData.amount > 0
+                ? `Terbilang: Rp ${formData.amount.toLocaleString('id-ID')}`
+                : 'Masukkan angka nominal (contoh: 50000)'
+            }
           />
 
           <FormInput

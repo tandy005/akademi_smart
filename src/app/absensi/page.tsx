@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense, useMemo } from 'react';
+import React, { useState, useEffect, Suspense, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRole } from '@/context/RoleContext';
 import {
@@ -11,13 +11,12 @@ import {
   Search,
   Calendar,
   Clock,
-  MapPin,
-  User,
   AlertCircle,
   Users,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import {
-  TrainingSchedule,
   Member,
   AttendanceRecord,
   AttendanceStatus,
@@ -25,17 +24,44 @@ import {
 } from '@/lib/types';
 import { PageHeader, Button, Badge } from '@/components/ui';
 
+const INDONESIAN_DAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+const INDONESIAN_MONTHS = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
+function formatDisplayDate(dateStr: string) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  if (isNaN(d.getTime())) return dateStr;
+  const dayName = INDONESIAN_DAYS[d.getDay()];
+  const dayNum = d.getDate();
+  const monthName = INDONESIAN_MONTHS[d.getMonth()];
+  const year = d.getFullYear();
+  return `${dayName}, ${dayNum} ${monthName} ${year}`;
+}
+
+function getDayName(dateStr: string) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  if (isNaN(d.getTime())) return '';
+  return INDONESIAN_DAYS[d.getDay()];
+}
+
 function AbsensiContent() {
   const { role, currentMember } = useRole();
   const searchParams = useSearchParams();
-  const preselectedScheduleId = searchParams.get('scheduleId');
+  const preselectedDate = searchParams.get('date');
 
-  const [schedules, setSchedules] = useState<TrainingSchedule[]>([]);
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const [selectedDate, setSelectedDate] = useState<string>(preselectedDate || todayStr);
+  const [sessionTitle, setSessionTitle] = useState<string>('Latihan Rutin');
+
   const [members, setMembers] = useState<Member[]>([]);
   const [allAttendances, setAllAttendances] = useState<AttendanceRecord[]>([]);
-  const [selectedScheduleId, setSelectedScheduleId] = useState<string>('');
-  const [filterMode, setFilterMode] = useState<'ALL_ACTIVE' | 'CATEGORY'>('ALL_ACTIVE');
   const [searchMemberQuery, setSearchMemberQuery] = useState('');
+  const [genderFilter, setGenderFilter] = useState<'ALL' | 'Putra' | 'Putri'>('ALL');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
@@ -47,25 +73,13 @@ function AbsensiContent() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [schRes, memRes, attRes] = await Promise.all([
-        fetch('/api/schedules'),
+      const [memRes, attRes] = await Promise.all([
         fetch('/api/members'),
         fetch('/api/attendance'),
       ]);
 
-      let schList: TrainingSchedule[] = [];
-      if (schRes.ok) {
-        schList = await schRes.json();
-        setSchedules(schList);
-      }
       if (memRes.ok) setMembers(await memRes.json());
       if (attRes.ok) setAllAttendances(await attRes.json());
-
-      if (preselectedScheduleId && schList.some((s) => s.id === preselectedScheduleId)) {
-        setSelectedScheduleId(preselectedScheduleId);
-      } else if (schList.length > 0) {
-        setSelectedScheduleId(schList[0].id);
-      }
     } catch (err) {
       console.error('Error fetching attendance data:', err);
     } finally {
@@ -77,18 +91,18 @@ function AbsensiContent() {
     fetchData();
   }, []);
 
-  // Update status map whenever selectedScheduleId or allAttendances changes
+  // Update status map whenever selectedDate or allAttendances changes
   useEffect(() => {
-    if (!selectedScheduleId) return;
+    if (!selectedDate) return;
 
-    const existingForSchedule = allAttendances.filter(
-      (a) => a.scheduleId === selectedScheduleId
+    const existingForDate = allAttendances.filter(
+      (a) => a.scheduleId === selectedDate || a.date === selectedDate
     );
 
     const initialMap: Record<string, { status: AttendanceStatus; notes: string }> = {};
 
     members.forEach((m) => {
-      const found = existingForSchedule.find((a) => a.memberId === m.id);
+      const found = existingForDate.find((a) => a.memberId === m.id);
       if (found) {
         initialMap[m.id] = { status: found.status, notes: found.notes || '' };
       } else {
@@ -98,35 +112,38 @@ function AbsensiContent() {
     });
 
     setStatusMap(initialMap);
-  }, [selectedScheduleId, allAttendances, members]);
+  }, [selectedDate, allAttendances, members]);
 
-  const selectedSchedule = useMemo(() => {
-    return schedules.find((s) => s.id === selectedScheduleId);
-  }, [schedules, selectedScheduleId]);
+  // Check if current date already has saved records
+  const existingSavedRecords = useMemo(() => {
+    if (!selectedDate) return [];
+    return allAttendances.filter(
+      (a) => a.scheduleId === selectedDate || a.date === selectedDate
+    );
+  }, [allAttendances, selectedDate]);
 
-  // Check if current schedule already has saved records
-  const existingSavedCount = useMemo(() => {
-    if (!selectedScheduleId) return 0;
-    return allAttendances.filter((a) => a.scheduleId === selectedScheduleId).length;
-  }, [allAttendances, selectedScheduleId]);
+  // List of recorded dates history (for quick jump)
+  const recordedDates = useMemo(() => {
+    const dates = new Set<string>();
+    allAttendances.forEach((a) => {
+      if (a.scheduleId && /^\d{4}-\d{2}-\d{2}$/.test(a.scheduleId)) {
+        dates.add(a.scheduleId);
+      } else if (a.date) {
+        dates.add(a.date);
+      }
+    });
+    return Array.from(dates).sort((a, b) => b.localeCompare(a));
+  }, [allAttendances]);
 
-  // Target members eligible to be attended
+  // Target members filtered
   const targetMembers = useMemo(() => {
     return members.filter((m) => {
       if (m.status === 'Non-Aktif') return false;
 
-      // Filter by category if user explicitly chose CATEGORY filter and schedule has a specific category
-      if (
-        filterMode === 'CATEGORY' &&
-        selectedSchedule &&
-        selectedSchedule.category !== 'Semua Kategori' &&
-        m.category &&
-        m.category !== selectedSchedule.category
-      ) {
+      if (genderFilter !== 'ALL' && m.gender !== genderFilter) {
         return false;
       }
 
-      // Filter by search query
       if (searchMemberQuery.trim()) {
         const q = searchMemberQuery.toLowerCase();
         return (
@@ -137,7 +154,7 @@ function AbsensiContent() {
 
       return true;
     });
-  }, [members, filterMode, selectedSchedule, searchMemberQuery]);
+  }, [members, genderFilter, searchMemberQuery]);
 
   const handleStatusChange = (memberId: string, status: AttendanceStatus) => {
     setStatusMap((prev) => ({
@@ -171,7 +188,7 @@ function AbsensiContent() {
   };
 
   const handleSaveAttendance = async () => {
-    if (!selectedScheduleId) return;
+    if (!selectedDate) return;
     setSaving(true);
     setSaveSuccessMsg(null);
 
@@ -186,13 +203,13 @@ function AbsensiContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          scheduleId: selectedScheduleId,
+          scheduleId: selectedDate,
           records,
         }),
       });
 
       if (res.ok) {
-        setSaveSuccessMsg(`✅ Absensi berhasil disimpan untuk ${records.length} atlet!`);
+        setSaveSuccessMsg(`✅ Absensi tanggal ${formatDisplayDate(selectedDate)} berhasil disimpan untuk ${records.length} atlet!`);
         const attRes = await fetch('/api/attendance');
         if (attRes.ok) setAllAttendances(await attRes.json());
       } else {
@@ -205,7 +222,16 @@ function AbsensiContent() {
     }
   };
 
-  // Summary counts
+  // Step date forward or backward
+  const handleStepDate = (days: number) => {
+    const d = new Date(selectedDate + 'T00:00:00');
+    if (!isNaN(d.getTime())) {
+      d.setDate(d.getDate() + days);
+      setSelectedDate(d.toISOString().split('T')[0]);
+    }
+  };
+
+  // Summary counts for this date
   const counts = useMemo(() => {
     const res = { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 };
     targetMembers.forEach((m) => {
@@ -224,7 +250,7 @@ function AbsensiContent() {
         badgeText="Kehadiran & Absensi Atlet"
         badgeIcon={<ClipboardCheck className="w-3.5 h-3.5" />}
         title="Pencatatan Absensi Latihan"
-        subtitle="Ceklis kehadiran atlet bola voli, rekap izin/sakit, dan evaluasi performa latihan"
+        subtitle="Ceklis kehadiran atlet bola voli, rekap izin/sakit, dan sinkronisasi statistik kehadiran ke dashboard anggota"
         actions={
           role !== 'MEMBER' && (
             <Button
@@ -257,88 +283,141 @@ function AbsensiContent() {
         </div>
       )}
 
-      {/* Select Schedule & Session Info */}
+      {/* Date Selector & Session Bar */}
       <div className="p-5 rounded-2xl bg-smart-card border border-smart-border space-y-4 shadow-md">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex-1">
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          {/* Date Picker with Day auto-calculation */}
+          <div className="space-y-1.5 flex-1 max-w-lg">
+            <label className="block text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-smart-gold-light" />
-              <span>Pilih Sesi Jadwal Latihan:</span>
+              <span>Pilih Tanggal Sesi Latihan:</span>
             </label>
-            <select
-              value={selectedScheduleId}
-              onChange={(e) => setSelectedScheduleId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-smart-dark border border-smart-border rounded-xl text-xs text-white focus:outline-none focus:border-smart-gold font-medium"
-            >
-              {schedules.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.date} ({s.startTime} - {s.endTime} WIB) &bull; {s.title} &bull; [{s.category}] - {s.location}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleStepDate(-1)}
+                title="Hari Sebelumnya"
+                className="p-2.5 bg-smart-dark border border-smart-border rounded-xl text-slate-300 hover:text-white hover:border-smart-gold transition cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              {/* Enhanced Date Picker Container */}
+              <div
+                onClick={() => {
+                  const el = dateInputRef.current;
+                  if (el) {
+                    if (typeof (el as any).showPicker === 'function') {
+                      (el as any).showPicker();
+                    } else {
+                      el.focus();
+                    }
+                  }
+                }}
+                className="flex-1 relative flex items-center bg-smart-dark border border-smart-border hover:border-smart-gold rounded-xl px-3 py-2 cursor-pointer transition group"
+              >
+                <Calendar className="w-4 h-4 text-smart-gold mr-2.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                <input
+                  ref={dateInputRef}
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full bg-transparent text-white text-xs font-bold focus:outline-none cursor-pointer [color-scheme:dark]"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleStepDate(1)}
+                title="Hari Berikutnya"
+                className="p-2.5 bg-smart-dark border border-smart-border rounded-xl text-slate-300 hover:text-white hover:border-smart-gold transition cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedDate(todayStr)}
+                className="px-3 py-2.5 bg-smart-dark border border-smart-border rounded-xl text-[11px] font-bold text-smart-gold-light hover:bg-smart-card-hover hover:border-smart-gold transition cursor-pointer whitespace-nowrap"
+              >
+                Hari Ini
+              </button>
+            </div>
+            <div className="text-[11px] text-slate-400">
+              Hari Terpilih: <strong className="text-smart-gold-light font-bold">{formatDisplayDate(selectedDate)}</strong>
+            </div>
           </div>
 
-          {/* Schedule Status Badge */}
-          <div className="flex md:flex-col items-start md:items-end justify-between gap-1 pt-1">
-            <span className="text-[11px] text-slate-400">Status Sesi:</span>
-            {existingSavedCount > 0 ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-semibold text-xs">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Sudah Diabsen ({existingSavedCount} Atlet)
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-semibold text-xs">
-                <AlertCircle className="w-3.5 h-3.5" />
-                Belum Diabsen (Draft)
-              </span>
-            )}
+          {/* Session Title Input & Status Badge */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-smart-gold-light" />
+                <span>Keterangan Sesi:</span>
+              </label>
+              <input
+                type="text"
+                value={sessionTitle}
+                onChange={(e) => setSessionTitle(e.target.value)}
+                placeholder="Contoh: Latihan Rutin Sore"
+                className="px-3 py-2 bg-smart-dark border border-smart-border rounded-xl text-xs text-white focus:outline-none focus:border-smart-gold w-48"
+              />
+            </div>
+
+            <div className="space-y-1 sm:self-end">
+              <div className="text-[11px] text-slate-400">Status Absensi:</div>
+              {existingSavedRecords.length > 0 ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Tersimpan ({existingSavedRecords.length} Atlet)
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-xs">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  Belum Disimpan (Draft)
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Schedule Detail Pill */}
-        {selectedSchedule && (
-          <div className="p-3 rounded-xl bg-smart-dark/60 border border-smart-border/70 flex flex-wrap items-center gap-4 text-xs text-slate-300">
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-smart-gold-light" />
-              <span>
-                {selectedSchedule.startTime} - {selectedSchedule.endTime} WIB
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-smart-red" />
-              <span>{selectedSchedule.location}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-blue-400" />
-              <span>Pelatih: Coach {selectedSchedule.coachName}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Badge variant="gold" size="sm">
-                Kategori: {selectedSchedule.category}
-              </Badge>
-            </div>
+        {/* Counter Rekapitulasi Kehadiran Hari Terpilih */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-2 border-t border-smart-border/70">
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center transition">
+            <span className="text-[11px] text-emerald-400 block font-medium">Hadir</span>
+            <span className="text-xl font-black text-emerald-300">{counts.HADIR}</span>
           </div>
-        )}
+          <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-center transition">
+            <span className="text-[11px] text-blue-400 block font-medium">Izin</span>
+            <span className="text-xl font-black text-blue-300">{counts.IZIN}</span>
+          </div>
+          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center transition">
+            <span className="text-[11px] text-amber-400 block font-medium">Sakit</span>
+            <span className="text-xl font-black text-amber-300">{counts.SAKIT}</span>
+          </div>
+          <div className="p-3 rounded-xl bg-smart-red/20 border border-smart-red/30 text-center transition">
+            <span className="text-[11px] text-red-300 block font-medium">Alpa</span>
+            <span className="text-xl font-black text-red-300">{counts.ALPA}</span>
+          </div>
+        </div>
 
-        {/* Counter Rekapitulasi Kehadiran */}
-        {selectedSchedule && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-1">
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center transition">
-              <span className="text-[11px] text-emerald-400 block font-medium">Hadir</span>
-              <span className="text-xl font-black text-emerald-300">{counts.HADIR}</span>
-            </div>
-            <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-center transition">
-              <span className="text-[11px] text-blue-400 block font-medium">Izin</span>
-              <span className="text-xl font-black text-blue-300">{counts.IZIN}</span>
-            </div>
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center transition">
-              <span className="text-[11px] text-amber-400 block font-medium">Sakit</span>
-              <span className="text-xl font-black text-amber-300">{counts.SAKIT}</span>
-            </div>
-            <div className="p-3 rounded-xl bg-smart-red/20 border border-smart-red/30 text-center transition">
-              <span className="text-[11px] text-red-300 block font-medium">Alpa</span>
-              <span className="text-xl font-black text-red-300">{counts.ALPA}</span>
-            </div>
+        {/* History Quick Links if any */}
+        {recordedDates.length > 0 && (
+          <div className="pt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
+            <span className="text-slate-400">Riwayat Tanggal Tersimpan:</span>
+            {recordedDates.slice(0, 5).map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setSelectedDate(d)}
+                className={`px-2.5 py-1 rounded-lg border font-mono transition cursor-pointer ${
+                  selectedDate === d
+                    ? 'bg-smart-gold text-smart-dark font-bold border-smart-gold'
+                    : 'bg-smart-dark border-smart-border text-slate-300 hover:text-white'
+                }`}
+              >
+                {d} ({getDayName(d)})
+              </button>
+            ))}
           </div>
         )}
       </div>
@@ -358,33 +437,23 @@ function AbsensiContent() {
             />
           </div>
 
-          {/* Toggle All Active vs Category Filter */}
-          {selectedSchedule && selectedSchedule.category !== 'Semua Kategori' && (
-            <div className="flex items-center gap-1 bg-smart-dark p-1 rounded-xl border border-smart-border text-xs">
+          {/* Gender Filter Buttons */}
+          <div className="flex items-center gap-1 bg-smart-dark p-1 rounded-xl border border-smart-border text-xs">
+            {(['ALL', 'Putra', 'Putri'] as const).map((g) => (
               <button
+                key={g}
                 type="button"
-                onClick={() => setFilterMode('ALL_ACTIVE')}
+                onClick={() => setGenderFilter(g)}
                 className={`px-3 py-1.5 rounded-lg font-medium transition cursor-pointer text-xs ${
-                  filterMode === 'ALL_ACTIVE'
+                  genderFilter === g
                     ? 'bg-smart-gold text-smart-dark font-bold shadow-xs'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Semua Atlet Aktif
+                {g === 'ALL' ? 'Semua Atlet' : `Tim ${g}`}
               </button>
-              <button
-                type="button"
-                onClick={() => setFilterMode('CATEGORY')}
-                className={`px-3 py-1.5 rounded-lg font-medium transition cursor-pointer text-xs ${
-                  filterMode === 'CATEGORY'
-                    ? 'bg-smart-gold text-smart-dark font-bold shadow-xs'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Sesuai Kategori ({selectedSchedule.category})
-              </button>
-            </div>
-          )}
+            ))}
+          </div>
 
           {/* Quick Mark Buttons for Coach / Admin */}
           {role !== 'MEMBER' && (
@@ -434,7 +503,7 @@ function AbsensiContent() {
                 <th className="py-3.5 px-4">Nama Atlet</th>
                 <th className="py-3.5 px-4 w-40">Umur &amp; Gender</th>
                 <th className="py-3.5 px-4 w-64">Status Kehadiran</th>
-                <th className="py-3.5 px-4">Catatan Performa Lapangan</th>
+                <th className="py-3.5 px-4">Catatan Performa Lapangan / Alasan Izin</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-smart-border/60">
@@ -460,44 +529,27 @@ function AbsensiContent() {
 
                     {/* Nama Atlet */}
                     <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-smart-maroon/40 border border-smart-gold/40 text-smart-gold-light font-bold flex items-center justify-center text-xs flex-shrink-0 shadow-inner">
-                          {m.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="font-bold text-white text-sm flex items-center gap-1.5">
-                            <span>{m.name}</span>
-                            {isCurrentLoggedInMember && (
-                              <Badge variant="gold" size="sm">
-                                Anda
-                              </Badge>
-                            )}
-                          </div>
-                          {m.registrationNumber && (
-                            <div className="text-[10px] text-slate-500 font-mono">
-                              {m.registrationNumber}
-                            </div>
-                          )}
-                        </div>
+                      <div className="font-bold text-white text-sm flex items-center gap-1.5">
+                        <span>{m.name}</span>
+                        {isCurrentLoggedInMember && (
+                          <Badge variant="gold" size="sm">
+                            Anda
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-slate-400 font-mono">
+                        {m.registrationNumber} &bull; {m.category || 'Reguler'}
                       </div>
                     </td>
 
                     {/* Umur & Gender */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2 text-slate-300">
-                        <span className="font-medium text-xs">
-                          {age > 0 ? `${age} Thn` : '-'}
-                        </span>
-                        <span
-                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border ${
-                            m.gender === 'Putri'
-                              ? 'bg-rose-500/10 text-rose-300 border-rose-500/30'
-                              : 'bg-blue-500/10 text-blue-300 border-blue-500/30'
-                          }`}
-                        >
-                          {m.gender || 'Putra'}
-                        </span>
-                      </div>
+                    <td className="py-3.5 px-4 text-slate-300">
+                      <div>{age > 0 ? `${age} Tahun` : '-'}</div>
+                      <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded ${
+                        m.gender === 'Putri' ? 'bg-rose-500/20 text-rose-300' : 'bg-blue-500/20 text-blue-300'
+                      }`}>
+                        {m.gender || 'Putra'}
+                      </span>
                     </td>
 
                     {/* Status Kehadiran (Pill Buttons) */}
@@ -550,7 +602,7 @@ function AbsensiContent() {
                           type="text"
                           value={currentNote}
                           onChange={(e) => handleNotesChange(m.id, e.target.value)}
-                          placeholder="Catatan pelatih (misal: passing stabil, servis tajam)"
+                          placeholder="Keterangan izin / catatan pelatih"
                           className="w-full px-2.5 py-1.5 bg-smart-dark border border-smart-border rounded-lg text-slate-200 text-xs focus:outline-none focus:border-smart-gold"
                         />
                       ) : (
@@ -580,7 +632,7 @@ function AbsensiContent() {
         {role !== 'MEMBER' && targetMembers.length > 5 && (
           <div className="p-4 bg-smart-dark/80 border-t border-smart-border flex justify-between items-center">
             <span className="text-xs text-slate-400">
-              Total {targetMembers.length} atlet siap disimpan.
+              Total {targetMembers.length} atlet siap disimpan untuk tanggal {formatDisplayDate(selectedDate)}.
             </span>
             <Button
               variant="primary"

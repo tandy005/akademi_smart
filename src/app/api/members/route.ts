@@ -10,7 +10,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const auth = await requireAuth(['ADMIN', 'COACH']);
+    const auth = await requireAuth(['ADMIN']);
     if (!auth.authorized) {
       return NextResponse.json(
         { error: auth.errorResponse?.error || 'Akses ditolak' },
@@ -59,8 +59,9 @@ export async function POST(req: Request) {
 
     db.members.push(newMember);
 
-    // Also auto-generate monthly dues for current year for this member
-    for (let m = 1; m <= 12; m++) {
+    // Also auto-generate monthly dues for current year for this member (start from October for 2026)
+    const startMonth = currentYear === 2026 ? 10 : 1;
+    for (let m = startMonth; m <= 12; m++) {
       db.dues.push({
         id: `due-${newMember.id}-${currentYear}-${m}`,
         memberId: newMember.id,
@@ -81,7 +82,7 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const auth = await requireAuth(['ADMIN', 'COACH']);
+    const auth = await requireAuth(['ADMIN']);
     if (!auth.authorized) {
       return NextResponse.json(
         { error: auth.errorResponse?.error || 'Akses ditolak' },
@@ -130,7 +131,7 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const auth = await requireAuth(['ADMIN', 'COACH']);
+    const auth = await requireAuth(['ADMIN']);
     if (!auth.authorized) {
       return NextResponse.json(
         { error: auth.errorResponse?.error || 'Akses ditolak' },

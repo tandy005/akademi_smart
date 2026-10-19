@@ -7,6 +7,7 @@ import {
   Search,
   CheckCircle2,
   DollarSign,
+  Info,
 } from 'lucide-react';
 import { Member, MonthlyDue } from '@/lib/types';
 import ReceiptModal from '@/components/ReceiptModal';
@@ -39,7 +40,7 @@ export default function KasPage() {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [members, setMembers] = useState<Member[]>([]);
   const [dues, setDues] = useState<MonthlyDue[]>([]);
-  const [monthlyDueAmount, setMonthlyDueAmount] = useState<number>(75000);
+  const [monthlyDueAmount, setMonthlyDueAmount] = useState<number>(10000);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -47,7 +48,7 @@ export default function KasPage() {
   const [payModalDue, setPayModalDue] = useState<MonthlyDue | null>(null);
   const [payModalMember, setPayModalMember] = useState<Member | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'Tunai' | 'Transfer Bank' | 'QRIS'>('Tunai');
-  const [customAmount, setCustomAmount] = useState<number>(75000);
+  const [customAmount, setCustomAmount] = useState<number>(10000);
   const [paymentNote, setPaymentNote] = useState<string>('Lunas tepat waktu');
   const [submitting, setSubmitting] = useState(false);
 
@@ -204,9 +205,19 @@ export default function KasPage() {
         />
       </div>
 
+      {/* Information Banner for 2026 Start */}
+      {year === 2026 && (
+        <div className="p-3.5 rounded-2xl bg-smart-gold/10 border border-smart-gold/30 text-smart-gold-light text-xs flex items-center gap-2.5 shadow-sm">
+          <Info className="w-4 h-4 flex-shrink-0 text-smart-gold" />
+          <span>
+            <strong>Kebijakan Kas:</strong> Iuran kas bulanan tahun 2026 dimulai efektif per <strong>Bulan Oktober 2026</strong> (Oktober, November, dan Desember). Bulan Januari s/d September belum diberlakukan iuran kas.
+          </span>
+        </div>
+      )}
+
       {/* Legend & Search */}
       <div className="p-4 rounded-2xl bg-smart-card border border-smart-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-md">
-        <div className="flex items-center gap-4 text-slate-300">
+        <div className="flex flex-wrap items-center gap-4 text-slate-300">
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
             <span>Lunas (Klik untuk Cetak Kuitansi / Share WA)</span>
@@ -215,6 +226,12 @@ export default function KasPage() {
             <span className="w-3 h-3 rounded-full bg-smart-dark border border-smart-border inline-block"></span>
             <span>Belum Bayar (Klik untuk Catat Bayar)</span>
           </div>
+          {year === 2026 && (
+            <div className="flex items-center gap-1.5 text-slate-400">
+              <span className="text-slate-500 font-mono font-bold">&mdash;</span>
+              <span>Belum Diberlakukan (Sebelum Okt 2026)</span>
+            </div>
+          )}
         </div>
 
         <div className="relative">
@@ -239,16 +256,24 @@ export default function KasPage() {
                   Nama Atlet &amp; ID
                 </th>
                 <th className="py-3.5 px-3 min-w-20">Kategori</th>
-                {MONTHS_SHORT.map((m, idx) => (
-                  <th
-                    key={m}
-                    className={`py-3.5 px-2 text-center min-w-14 ${
-                      idx + 1 === currentMonth ? 'text-smart-gold-light bg-smart-maroon/20' : ''
-                    }`}
-                  >
-                    {m}
-                  </th>
-                ))}
+                {MONTHS_SHORT.map((m, idx) => {
+                  const isPreStart = year === 2026 && idx + 1 < 10;
+                  return (
+                    <th
+                      key={m}
+                      className={`py-3.5 px-2 text-center min-w-14 ${
+                        isPreStart
+                          ? 'opacity-35 font-normal'
+                          : idx + 1 === currentMonth
+                          ? 'text-smart-gold-light bg-smart-maroon/20 font-bold'
+                          : ''
+                      }`}
+                      title={isPreStart ? 'Iuran kas dimulai Oktober 2026' : undefined}
+                    >
+                      {m}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody className="divide-y divide-smart-border/60">
@@ -285,8 +310,23 @@ export default function KasPage() {
                     {/* 12 Months Cells */}
                     {MONTHS_SHORT.map((_, idx) => {
                       const monthNum = idx + 1;
+                      const isPreStart = year === 2026 && monthNum < 10;
                       const due = dues.find((d) => d.memberId === m.id && d.month === monthNum);
                       const isPaid = due?.isPaid;
+
+                      if (isPreStart) {
+                        return (
+                          <td
+                            key={monthNum}
+                            className="py-2 px-1 text-center bg-smart-dark/20"
+                            title="Iuran kas dimulai Oktober 2026"
+                          >
+                            <span className="text-slate-600 text-xs font-mono font-medium select-none block">
+                              &mdash;
+                            </span>
+                          </td>
+                        );
+                      }
 
                       return (
                         <td
@@ -356,9 +396,11 @@ export default function KasPage() {
             <FormInput
               label="Nominal Pembayaran (Rp)"
               type="number"
+              readOnly
               required
               value={customAmount}
-              onChange={(e) => setCustomAmount(Number(e.target.value))}
+              className="bg-slate-100 text-slate-600 font-bold cursor-not-allowed border-dashed select-none"
+              helperText="Nominal iuran telah ditetapkan tetap Rp 10.000 per bulan per anggota."
             />
 
             <div>

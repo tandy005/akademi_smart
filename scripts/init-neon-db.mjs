@@ -74,24 +74,6 @@ async function main() {
     );
   `;
 
-  // 3. Training schedules
-  await sql`
-    CREATE TABLE IF NOT EXISTS schedules (
-      id VARCHAR(50) PRIMARY KEY,
-      title VARCHAR(255) NOT NULL,
-      category VARCHAR(50) NOT NULL,
-      date VARCHAR(20) NOT NULL,
-      start_time VARCHAR(10) NOT NULL,
-      end_time VARCHAR(10) NOT NULL,
-      location VARCHAR(255) NOT NULL,
-      coach_name VARCHAR(255) NOT NULL,
-      focus_material TEXT NOT NULL,
-      description TEXT,
-      reminder_sent BOOLEAN DEFAULT FALSE,
-      reminder_sent_at VARCHAR(50),
-      reminder_hours_before INT DEFAULT 4
-    );
-  `;
 
   // 4. Attendances
   await sql`
@@ -136,20 +118,6 @@ async function main() {
     );
   `;
 
-  // 7. News & Agendas
-  await sql`
-    CREATE TABLE IF NOT EXISTS news (
-      id VARCHAR(50) PRIMARY KEY,
-      title VARCHAR(255) NOT NULL,
-      category VARCHAR(50) NOT NULL,
-      date VARCHAR(20) NOT NULL,
-      author VARCHAR(100) NOT NULL,
-      content TEXT NOT NULL,
-      summary TEXT NOT NULL,
-      location VARCHAR(255),
-      is_pinned BOOLEAN DEFAULT FALSE
-    );
-  `;
 
   // 8. WhatsApp Config
   await sql`
@@ -253,29 +221,6 @@ async function main() {
       console.log(`✅ Migrated ${data.members.length} members`);
     }
 
-    // Schedules
-    if (Array.isArray(data.schedules)) {
-      for (const s of data.schedules) {
-        await sql`
-          INSERT INTO schedules (id, title, category, date, start_time, end_time, location, coach_name, focus_material, description, reminder_sent, reminder_sent_at, reminder_hours_before)
-          VALUES (${s.id}, ${s.title}, ${s.category}, ${s.date}, ${s.startTime}, ${s.endTime}, ${s.location}, ${s.coachName}, ${s.focusMaterial}, ${s.description || null}, ${s.reminderSent ?? false}, ${s.reminderSentAt || null}, ${s.reminderHoursBefore || 4})
-          ON CONFLICT (id) DO UPDATE SET
-            title = EXCLUDED.title,
-            category = EXCLUDED.category,
-            date = EXCLUDED.date,
-            start_time = EXCLUDED.start_time,
-            end_time = EXCLUDED.end_time,
-            location = EXCLUDED.location,
-            coach_name = EXCLUDED.coach_name,
-            focus_material = EXCLUDED.focus_material,
-            description = EXCLUDED.description,
-            reminder_sent = EXCLUDED.reminder_sent,
-            reminder_sent_at = EXCLUDED.reminder_sent_at,
-            reminder_hours_before = EXCLUDED.reminder_hours_before;
-        `;
-      }
-      console.log(`✅ Migrated ${data.schedules.length} schedules`);
-    }
 
     // Attendances
     if (Array.isArray(data.attendances)) {
@@ -335,25 +280,6 @@ async function main() {
       console.log(`✅ Migrated ${data.transactions.length} transactions`);
     }
 
-    // News
-    if (Array.isArray(data.news)) {
-      for (const n of data.news) {
-        await sql`
-          INSERT INTO news (id, title, category, date, author, content, summary, location, is_pinned)
-          VALUES (${n.id}, ${n.title}, ${n.category}, ${n.date}, ${n.author}, ${n.content}, ${n.summary}, ${n.location || null}, ${n.isPinned ?? false})
-          ON CONFLICT (id) DO UPDATE SET
-            title = EXCLUDED.title,
-            category = EXCLUDED.category,
-            date = EXCLUDED.date,
-            author = EXCLUDED.author,
-            content = EXCLUDED.content,
-            summary = EXCLUDED.summary,
-            location = EXCLUDED.location,
-            is_pinned = EXCLUDED.is_pinned;
-        `;
-      }
-      console.log(`✅ Migrated ${data.news.length} news items`);
-    }
 
     // Reminder logs
     if (Array.isArray(data.reminderLogs)) {
@@ -385,17 +311,7 @@ async function main() {
       role = EXCLUDED.role;
   `;
 
-  // 2. Coach
-  await sql`
-    INSERT INTO users (id, username, password_hash, name, role, member_id)
-    VALUES ('u-coach', 'coach', ${coachPassHash}, 'Coach Bambang Supriyanto', 'COACH', NULL)
-    ON CONFLICT (username) DO UPDATE SET
-      password_hash = EXCLUDED.password_hash,
-      name = EXCLUDED.name,
-      role = EXCLUDED.role;
-  `;
-
-  // 3. Demo Athlete: atlet / atlet123 (m-1)
+  // 2. Demo Athlete: atlet / atlet123 (m-1)
   await sql`
     INSERT INTO users (id, username, password_hash, name, role, member_id)
     VALUES ('u-atlet', 'atlet', ${athletePassHash}, 'Rivan Nurmulya (Atlet)', 'MEMBER', 'm-1')
@@ -406,10 +322,11 @@ async function main() {
       member_id = EXCLUDED.member_id;
   `;
 
-  // Also create member login for members using registration number
+  // Also create member login for members using smart+name+09
   const members = await sql`SELECT id, registration_number, name FROM members`;
   for (const m of members) {
-    const username = m.registration_number.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanName = m.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const username = `smart${cleanName}09`;
     const userHash = await bcrypt.hash('atlet123', salt);
     await sql`
       INSERT INTO users (id, username, password_hash, name, role, member_id)
@@ -420,8 +337,7 @@ async function main() {
 
   console.log('✅ Users successfully seeded:');
   console.log('   - ADMIN  : username="admin", password="admin123"');
-  console.log('   - COACH  : username="coach", password="coach123"');
-  console.log('   - MEMBER : username="atlet" (atau no registrasi), password="atlet123"');
+  console.log('   - MEMBER : username="smart<nama>09" (atau "atlet"), password="atlet123"');
   console.log('🎉 Neon database initialization completed!');
 }
 

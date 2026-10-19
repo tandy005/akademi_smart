@@ -6,22 +6,25 @@ import { requireAuth } from '@/lib/auth-session';
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const scheduleId = searchParams.get('scheduleId');
+  const date = searchParams.get('date');
   const db = await getDatabaseAsync();
 
+  let list = db.attendances;
   if (scheduleId) {
-    const list = db.attendances.filter((a) => a.scheduleId === scheduleId);
-    return NextResponse.json(list);
+    list = list.filter((a) => a.scheduleId === scheduleId);
+  } else if (date) {
+    list = list.filter((a) => a.scheduleId === date || a.date === date);
   }
 
-  return NextResponse.json(db.attendances);
+  return NextResponse.json(list);
 }
 
 export async function POST(req: Request) {
   try {
-    const auth = await requireAuth(['ADMIN', 'COACH']);
+    const auth = await requireAuth(['ADMIN']);
     if (!auth.authorized) {
       return NextResponse.json(
-        { error: auth.errorResponse?.error || 'Akses ditolak' },
+        { error: auth.errorResponse?.error || 'Akses ditolak: Hanya Pengurus yang dapat mencatat absensi' },
         { status: auth.errorResponse?.status || 403 }
       );
     }

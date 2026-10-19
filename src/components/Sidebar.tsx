@@ -26,56 +26,51 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { role, currentMember } = useRole();
 
-  const navItems = [
+  interface NavItem {
+    label: string;
+    href: string;
+    icon: React.ComponentType<{ className?: string }>;
+    roles: string[];
+    badge?: string;
+    badgeHighlight?: boolean;
+  }
+
+  const navItems: NavItem[] = [
     {
       label: 'Dashboard',
       href: '/',
       icon: LayoutDashboard,
-      roles: ['ADMIN', 'COACH', 'MEMBER'],
+      roles: ['ADMIN', 'MEMBER'],
     },
     {
       label: 'Data Anggota',
       href: '/anggota',
       icon: Users,
-      roles: ['ADMIN', 'COACH', 'MEMBER'],
-      badge: '10 Atlet',
-    },
-    {
-      label: 'Jadwal Latihan',
-      href: '/jadwal',
-      icon: CalendarDays,
-      roles: ['ADMIN', 'COACH', 'MEMBER'],
-      badgeHighlight: true,
+      roles: ['ADMIN'],
     },
     {
       label: 'Absensi Latihan',
       href: '/absensi',
       icon: ClipboardCheck,
-      roles: ['ADMIN', 'COACH', 'MEMBER'],
+      roles: ['ADMIN'],
     },
     {
       label: 'Kas Bulanan',
       href: '/kas',
       icon: CreditCard,
-      roles: ['ADMIN', 'MEMBER'],
+      roles: ['ADMIN'],
     },
     {
       label: 'Laporan Keuangan',
       href: '/keuangan',
       icon: TrendingUp,
-      roles: ['ADMIN'],
-    },
-    {
-      label: 'Berita & Agenda',
-      href: '/berita',
-      icon: Newspaper,
-      roles: ['ADMIN', 'COACH', 'MEMBER'],
+      roles: ['ADMIN', 'MEMBER'],
     },
     {
       label: 'WhatsApp Reminder',
       href: '/reminder',
       icon: MessageSquareText,
-      roles: ['ADMIN', 'COACH'],
+      roles: ['ADMIN'],
       badge: 'Auto 4 Jam',
     },
   ];
@@ -93,7 +88,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
 
       {/* Sidebar Content */}
-      {/* Sidebar Content */}
       <aside
         className={`fixed top-16 bottom-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transition-transform duration-200 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -107,23 +101,19 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs border shadow-xs ${
                   role === 'ADMIN'
                     ? 'bg-red-50 text-[#8F0000] border-red-200'
-                    : role === 'COACH'
-                    ? 'bg-amber-50 text-amber-700 border-amber-200'
                     : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                 }`}
               >
-                {role === 'ADMIN' ? 'ADM' : role === 'COACH' ? 'CCH' : 'MBR'}
+                {role === 'ADMIN' ? 'ADM' : 'MBR'}
               </div>
               <div className="overflow-hidden">
-                <div className="text-[11px] font-medium text-slate-500">Mode Pengguna</div>
+                <div className="text-[11px] font-medium text-slate-500">Peran Aktif</div>
                 <div className="text-sm font-bold text-slate-900 truncate">
                   {role === 'ADMIN'
-                    ? 'Pengurus / Admin'
-                    : role === 'COACH'
-                    ? 'Pelatih (Coach)'
+                    ? 'Pengurus'
                     : currentMember
                     ? currentMember.name
-                    : 'Portal Anggota'}
+                    : 'Anggota'}
                 </div>
               </div>
             </div>

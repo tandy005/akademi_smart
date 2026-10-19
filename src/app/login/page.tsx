@@ -22,7 +22,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useRole();
 
-  const [selectedRole, setSelectedRole] = useState<'ADMIN' | 'COACH' | 'MEMBER'>('ADMIN');
+  const [selectedRole, setSelectedRole] = useState<'ADMIN' | 'MEMBER'>('ADMIN');
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
@@ -31,18 +31,15 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const handleRoleSelect = (role: 'ADMIN' | 'COACH' | 'MEMBER') => {
+  const handleRoleSelect = (role: 'ADMIN' | 'MEMBER') => {
     setSelectedRole(role);
     setErrorMessage('');
     if (role === 'ADMIN') {
-      setUsername('admin');
-      setPassword('admin123');
-    } else if (role === 'COACH') {
-      setUsername('coach');
-      setPassword('coach123');
+      setUsername('');
+      setPassword('');
     } else {
-      setUsername('atlet');
-      setPassword('atlet123');
+      setUsername('');
+      setPassword('');
     }
   };
 
@@ -175,50 +172,35 @@ export default function LoginPage() {
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
                 Pilih Peran Akun:
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                {/* Admin Tab */}
+              <div className="grid grid-cols-2 gap-2.5">
+                {/* Pengurus Tab */}
                 <button
                   type="button"
                   onClick={() => handleRoleSelect('ADMIN')}
-                  className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all cursor-pointer ${
                     selectedRole === 'ADMIN'
                       ? 'bg-gradient-to-b from-[#8F0000] to-[#6b0606] text-white border-[#8F0000] shadow-md shadow-[#8F0000]/25 scale-[1.02]'
                       : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                   }`}
                 >
-                  <Shield className={`w-4 h-4 mb-0.5 ${selectedRole === 'ADMIN' ? 'text-smart-gold-light' : 'text-slate-500'}`} />
-                  <span className="text-xs font-bold">Admin</span>
-                  <span className={`text-[10px] ${selectedRole === 'ADMIN' ? 'text-white/80' : 'text-slate-400'}`}>Pengurus</span>
+                  <Shield className={`w-4 h-4 mb-1 ${selectedRole === 'ADMIN' ? 'text-smart-gold-light' : 'text-slate-500'}`} />
+                  <span className="text-xs font-bold">Pengurus</span>
+                  <span className={`text-[10px] ${selectedRole === 'ADMIN' ? 'text-white/80' : 'text-slate-400'}`}>Akses Semua Menu</span>
                 </button>
 
-                {/* Coach Tab */}
-                <button
-                  type="button"
-                  onClick={() => handleRoleSelect('COACH')}
-                  className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
-                    selectedRole === 'COACH'
-                      ? 'bg-gradient-to-b from-amber-600 to-amber-700 text-white border-amber-600 shadow-md shadow-amber-600/25 scale-[1.02]'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  <Award className={`w-4 h-4 mb-0.5 ${selectedRole === 'COACH' ? 'text-amber-100' : 'text-slate-500'}`} />
-                  <span className="text-xs font-bold">Pelatih</span>
-                  <span className={`text-[10px] ${selectedRole === 'COACH' ? 'text-white/80' : 'text-slate-400'}`}>Coach</span>
-                </button>
-
-                {/* Member Tab */}
+                {/* Anggota Tab */}
                 <button
                   type="button"
                   onClick={() => handleRoleSelect('MEMBER')}
-                  className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all cursor-pointer ${
                     selectedRole === 'MEMBER'
                       ? 'bg-gradient-to-b from-emerald-600 to-emerald-700 text-white border-emerald-600 shadow-md shadow-emerald-600/25 scale-[1.02]'
                       : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                   }`}
                 >
-                  <User className={`w-4 h-4 mb-0.5 ${selectedRole === 'MEMBER' ? 'text-emerald-100' : 'text-slate-500'}`} />
+                  <User className={`w-4 h-4 mb-1 ${selectedRole === 'MEMBER' ? 'text-emerald-100' : 'text-slate-500'}`} />
                   <span className="text-xs font-bold">Anggota</span>
-                  <span className={`text-[10px] ${selectedRole === 'MEMBER' ? 'text-white/80' : 'text-slate-400'}`}>Atlet/Wali</span>
+                  <span className={`text-[10px] ${selectedRole === 'MEMBER' ? 'text-white/80' : 'text-slate-400'}`}>Dashboard &amp; Keuangan</span>
                 </button>
               </div>
             </div>
@@ -254,7 +236,7 @@ export default function LoginPage() {
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder={selectedRole === 'MEMBER' ? 'Username atlet (atlet / smart2025001)' : 'Username'}
+                    placeholder={'Username'}
                     className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#8F0000] focus:ring-2 focus:ring-[#8F0000]/15 transition font-medium"
                   />
                 </div>

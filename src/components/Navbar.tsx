@@ -123,50 +123,44 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }: NavbarProps) 
 
         {/* Right: Role Switcher & Member Profile */}
         <div className="flex items-center gap-2.5">
-          {/* Persona Switcher Buttons */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner">
-            <button
-              onClick={() => setRole('ADMIN')}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                role === 'ADMIN'
-                  ? 'bg-gradient-to-r from-smart-maroon to-smart-red text-white shadow-sm border border-smart-red/50'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
-              }`}
-              title="Akses Pengurus / Admin"
-            >
-              <Shield className={`w-3.5 h-3.5 ${role === 'ADMIN' ? 'text-smart-gold-light' : 'text-slate-500'}`} />
-              <span className="hidden sm:inline">Admin</span>
-            </button>
+          {/* Persona Switcher / Role Badge */}
+          {user?.role === 'MEMBER' ? (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs">
+              <User className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Peran: Anggota</span>
+            </div>
+          ) : (
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner">
+              <button
+                onClick={() => setRole('ADMIN')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                  role === 'ADMIN'
+                    ? 'bg-gradient-to-r from-smart-maroon to-smart-red text-white shadow-sm border border-smart-red/50'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
+                }`}
+                title="Akses Pengurus"
+              >
+                <Shield className={`w-3.5 h-3.5 ${role === 'ADMIN' ? 'text-smart-gold-light' : 'text-slate-500'}`} />
+                <span className="hidden sm:inline">Pengurus</span>
+              </button>
 
-            <button
-              onClick={() => setRole('COACH')}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                role === 'COACH'
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
-              }`}
-              title="Akses Pelatih Lapangan"
-            >
-              <Award className={`w-3.5 h-3.5 ${role === 'COACH' ? 'text-white' : 'text-slate-500'}`} />
-              <span className="hidden sm:inline">Pelatih</span>
-            </button>
+              <button
+                onClick={() => setRole('MEMBER')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                  role === 'MEMBER'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
+                }`}
+                title="Pratinjau Mode Anggota"
+              >
+                <User className={`w-3.5 h-3.5 ${role === 'MEMBER' ? 'text-white' : 'text-slate-500'}`} />
+                <span className="hidden sm:inline">Anggota</span>
+              </button>
+            </div>
+          )}
 
-            <button
-              onClick={() => setRole('MEMBER')}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                role === 'MEMBER'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
-              }`}
-              title="Akses Atlet / Wali Murid"
-            >
-              <User className={`w-3.5 h-3.5 ${role === 'MEMBER' ? 'text-white' : 'text-slate-500'}`} />
-              <span className="hidden sm:inline">Anggota</span>
-            </button>
-          </div>
-
-          {/* Member selector if in MEMBER mode */}
-          {role === 'MEMBER' && (
+          {/* Member selector if in MEMBER mode and user is ADMIN */}
+          {role === 'MEMBER' && user?.role === 'ADMIN' && (
             <div className="hidden md:flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700">
               <span className="text-slate-500 font-medium">Atlet:</span>
               <select
@@ -177,22 +171,24 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }: NavbarProps) 
               >
                 {allMembers.map((m) => (
                   <option key={m.id} value={m.id} className="bg-white text-slate-900">
-                    {m.name} ({m.position})
+                    {m.name} ({m.category})
                   </option>
                 ))}
               </select>
             </div>
           )}
 
-          {/* WhatsApp Reminder Direct Link Shortcut */}
-          <Link
-            href="/reminder"
-            className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#8F0000] border border-slate-200 transition relative shadow-xs"
-            title="Pengaturan WhatsApp & Reminder 4 Jam"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-smart-red rounded-full ring-2 ring-white"></span>
-          </Link>
+          {/* WhatsApp Reminder Direct Link Shortcut (Pengurus Only) */}
+          {role === 'ADMIN' && (
+            <Link
+              href="/reminder"
+              className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#8F0000] border border-slate-200 transition relative shadow-xs"
+              title="Pengaturan WhatsApp & Reminder 4 Jam"
+            >
+              <Bell className="w-4 h-4" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-smart-red rounded-full ring-2 ring-white"></span>
+            </Link>
+          )}
 
           {/* User Auth Action (Login / Logout) */}
           {user ? (

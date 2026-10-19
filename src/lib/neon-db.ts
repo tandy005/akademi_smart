@@ -37,12 +37,13 @@ export async function authenticateUser(username: string, passwordPlain: string):
         createdAt: new Date().toISOString(),
       };
     }
-    if (cleanUsername === 'pelatih' && (passwordPlain === 'coach123' || passwordPlain === 'pelatih')) {
+    if (cleanUsername === 'atlet' && (passwordPlain === 'atlet123' || passwordPlain === 'atlet')) {
       return {
-        id: 'u-coach',
-        username: 'pelatih',
-        name: 'Head Coach',
-        role: 'COACH',
+        id: 'u-atlet',
+        username: 'atlet',
+        name: 'Acin (Atlet / Anggota)',
+        role: 'MEMBER',
+        memberId: 'm-1',
         createdAt: new Date().toISOString(),
       };
     }
@@ -116,12 +117,13 @@ export async function getUserById(id: string): Promise<DbUser | null> {
         createdAt: new Date().toISOString(),
       };
     }
-    if (id === 'u-coach') {
+    if (id === 'u-atlet') {
       return {
-        id: 'u-coach',
-        username: 'pelatih',
-        name: 'Head Coach',
-        role: 'COACH',
+        id: 'u-atlet',
+        username: 'atlet',
+        name: 'Acin (Atlet / Anggota)',
+        role: 'MEMBER',
+        memberId: 'm-1',
         createdAt: new Date().toISOString(),
       };
     }
@@ -173,25 +175,21 @@ export async function getNeonDatabase(): Promise<AppData> {
     settingsRows,
     configRows,
     membersRows,
-    schedulesRows,
     attendancesRows,
     duesRows,
     transactionsRows,
-    newsRows,
     logsRows
   ] = await Promise.all([
     sql`SELECT academy_name, monthly_due_amount FROM app_settings WHERE id = 1 LIMIT 1`,
     sql`SELECT provider, api_key, sender_number, webhook_url, auto_reminder_enabled, reminder_hours_before, message_template FROM whatsapp_config WHERE id = 1 LIMIT 1`,
     sql`SELECT id, registration_number, name, gender, birth_date, phone, parent_phone, position, category, jersey_number, height_cm, weight_kg, status, join_date, address, notes FROM members ORDER BY id ASC`,
-    sql`SELECT id, title, category, date, start_time, end_time, location, coach_name, focus_material, description, reminder_sent, reminder_sent_at, reminder_hours_before FROM schedules ORDER BY date DESC, start_time DESC`,
     sql`SELECT id, schedule_id, member_id, status, notes, recorded_at FROM attendances ORDER BY recorded_at DESC`,
     sql`SELECT id, member_id, month, year, amount, is_paid, paid_at, payment_method, receipt_number, note FROM monthly_dues ORDER BY year DESC, month ASC`,
     sql`SELECT id, type, category, amount, description, date, related_due_id, receipt_number, recorded_by FROM transactions ORDER BY date DESC`,
-    sql`SELECT id, title, category, date, author, content, summary, location, is_pinned FROM news ORDER BY is_pinned DESC, date DESC`,
     sql`SELECT id, schedule_id, schedule_title, member_id, recipient_name, recipient_phone, target_type, message, status, timestamp, error_detail FROM reminder_logs ORDER BY timestamp DESC LIMIT 100`
   ]);
 
-  const settings = settingsRows[0] || { academy_name: 'Akademi Smart', monthly_due_amount: 75000 };
+  const settings = settingsRows[0] || { academy_name: 'Akademi Smart', monthly_due_amount: 10000 };
   const wc = configRows[0] || {
     provider: 'SIMULATOR',
     api_key: '',
@@ -232,21 +230,7 @@ export async function getNeonDatabase(): Promise<AppData> {
     };
   });
 
-  const schedules: TrainingSchedule[] = schedulesRows.map((s: any) => ({
-    id: s.id,
-    title: s.title,
-    category: s.category,
-    date: s.date,
-    startTime: s.start_time,
-    endTime: s.end_time,
-    location: s.location,
-    coachName: s.coach_name,
-    focusMaterial: s.focus_material,
-    description: s.description ?? undefined,
-    reminderSent: Boolean(s.reminder_sent),
-    reminderSentAt: s.reminder_sent_at ?? undefined,
-    reminderHoursBefore: s.reminder_hours_before || 4,
-  }));
+  const schedules: TrainingSchedule[] = [];
 
   const seenAttKeys = new Set<string>();
   const attendances: AttendanceRecord[] = [];
@@ -290,17 +274,7 @@ export async function getNeonDatabase(): Promise<AppData> {
     recordedBy: t.recorded_by,
   }));
 
-  const news: NewsAgenda[] = newsRows.map((n: any) => ({
-    id: n.id,
-    title: n.title,
-    category: n.category,
-    date: n.date,
-    author: n.author,
-    content: n.content,
-    summary: n.summary,
-    location: n.location ?? undefined,
-    isPinned: Boolean(n.is_pinned),
-  }));
+  const news: NewsAgenda[] = [];
 
   const whatsappConfig: WhatsAppConfig = {
     provider: wc.provider,
@@ -371,6 +345,18 @@ export async function saveNeonDatabase(data: AppData): Promise<void> {
   `;
 
   // Sync members
+  const memberIds = data.members.map((m) => m.id);
+  if (memberIds.length > 0) {
+    try {
+      await sql`DELETE FROM attendances WHERE NOT (member_id = ANY(${memberIds}))`;
+      await sql`DELETE FROM monthly_dues WHERE NOT (member_id = ANY(${memberIds}))`;
+      await sql`DELETE FROM users WHERE role = 'MEMBER' AND NOT (member_id = ANY(${memberIds}))`;
+      await sql`DELETE FROM members WHERE NOT (id = ANY(${memberIds}))`;
+    } catch (e) {
+      console.warn('Neon member cleanup warning:', e);
+    }
+  }
+
   for (const m of data.members) {
     const defaultBirthDate = m.birthDate || (m.age ? `${new Date().getFullYear() - m.age}-01-01` : '2010-01-01');
     const defaultCategory = m.category || (m.age ? (m.age <= 12 ? 'U-12' : m.age <= 15 ? 'U-15' : m.age <= 18 ? 'U-18' : 'Senior') : 'U-18');
@@ -399,27 +385,23 @@ export async function saveNeonDatabase(data: AppData): Promise<void> {
         address = EXCLUDED.address,
         notes = EXCLUDED.notes;
     `;
-  }
 
-  // Sync schedules
-  for (const s of data.schedules) {
-    await sql`
-      INSERT INTO schedules (id, title, category, date, start_time, end_time, location, coach_name, focus_material, description, reminder_sent, reminder_sent_at, reminder_hours_before)
-      VALUES (${s.id}, ${s.title}, ${s.category}, ${s.date}, ${s.startTime}, ${s.endTime}, ${s.location}, ${s.coachName}, ${s.focusMaterial}, ${s.description ?? null}, ${s.reminderSent}, ${s.reminderSentAt ?? null}, ${s.reminderHoursBefore})
-      ON CONFLICT (id) DO UPDATE SET
-        title = EXCLUDED.title,
-        category = EXCLUDED.category,
-        date = EXCLUDED.date,
-        start_time = EXCLUDED.start_time,
-        end_time = EXCLUDED.end_time,
-        location = EXCLUDED.location,
-        coach_name = EXCLUDED.coach_name,
-        focus_material = EXCLUDED.focus_material,
-        description = EXCLUDED.description,
-        reminder_sent = EXCLUDED.reminder_sent,
-        reminder_sent_at = EXCLUDED.reminder_sent_at,
-        reminder_hours_before = EXCLUDED.reminder_hours_before;
-  `;
+    // Ensure member login account exists with username: smart<nama>09
+    try {
+      const existingUser = await sql`SELECT id FROM users WHERE member_id = ${m.id} LIMIT 1`;
+      if (!existingUser || existingUser.length === 0) {
+        const cleanName = m.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const memberUsername = `smart${cleanName}09`;
+        const userHash = await bcrypt.hash('atlet123', 10);
+        await sql`
+          INSERT INTO users (id, username, password_hash, name, role, member_id)
+          VALUES (${'u-' + m.id}, ${memberUsername}, ${userHash}, ${m.name}, 'MEMBER', ${m.id})
+          ON CONFLICT (username) DO NOTHING;
+        `;
+      }
+    } catch (e) {
+      console.warn('Auto user creation warning for member:', m.name, e);
+    }
   }
 
   // Sync attendances
@@ -464,23 +446,6 @@ export async function saveNeonDatabase(data: AppData): Promise<void> {
         related_due_id = EXCLUDED.related_due_id,
         receipt_number = EXCLUDED.receipt_number,
         recorded_by = EXCLUDED.recorded_by;
-    `;
-  }
-
-  // Sync news
-  for (const n of data.news) {
-    await sql`
-      INSERT INTO news (id, title, category, date, author, content, summary, location, is_pinned)
-      VALUES (${n.id}, ${n.title}, ${n.category}, ${n.date}, ${n.author}, ${n.content}, ${n.summary}, ${n.location ?? null}, ${n.isPinned})
-      ON CONFLICT (id) DO UPDATE SET
-        title = EXCLUDED.title,
-        category = EXCLUDED.category,
-        date = EXCLUDED.date,
-        author = EXCLUDED.author,
-        content = EXCLUDED.content,
-        summary = EXCLUDED.summary,
-        location = EXCLUDED.location,
-        is_pinned = EXCLUDED.is_pinned;
     `;
   }
 }

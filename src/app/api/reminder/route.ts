@@ -6,8 +6,17 @@ import {
   sendWhatsAppMessage,
 } from '@/lib/whatsapp';
 import { WhatsAppConfig } from '@/lib/types';
+import { requireAuth } from '@/lib/auth-session';
 
 export async function GET() {
+  const auth = await requireAuth(['ADMIN']);
+  if (!auth.authorized) {
+    return NextResponse.json(
+      { error: auth.errorResponse?.error || 'Akses ditolak: Hanya Pengurus yang dapat mengakses WhatsApp Reminder' },
+      { status: auth.errorResponse?.status || 403 }
+    );
+  }
+
   const db = await getDatabaseAsync();
   return NextResponse.json({
     config: db.whatsappConfig,
@@ -18,6 +27,14 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const auth = await requireAuth(['ADMIN']);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { error: auth.errorResponse?.error || 'Akses ditolak: Hanya Pengurus yang dapat mengubah pengaturan reminder' },
+        { status: auth.errorResponse?.status || 403 }
+      );
+    }
+
     const body = await req.json();
     const db = await getDatabaseAsync();
 

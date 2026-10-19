@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDatabaseAsync, saveDatabaseAsync } from '@/lib/storage';
 import { MonthlyDue, CashTransaction } from '@/lib/types';
+import { requireAuth } from '@/lib/auth-session';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -23,6 +24,14 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const auth = await requireAuth(['ADMIN']);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { error: auth.errorResponse?.error || 'Akses ditolak: Hanya Pengurus yang dapat mengubah status kas' },
+        { status: auth.errorResponse?.status || 403 }
+      );
+    }
+
     const body: {
       dueId: string;
       isPaid: boolean;

@@ -50,6 +50,7 @@ export function calculateMemberAge(member: { birthDate?: string; age?: number })
 
 export interface TrainingSchedule {
   id: string;
+  day?: string; // e.g. "Selasa", "Kamis", "Sabtu"
   title: string;
   category: AgeCategory | 'Semua Kategori';
   date: string; // YYYY-MM-DD
@@ -68,7 +69,9 @@ export type AttendanceStatus = 'HADIR' | 'IZIN' | 'SAKIT' | 'ALPA';
 
 export interface AttendanceRecord {
   id: string;
-  scheduleId: string;
+  scheduleId?: string; // bisa berupa tanggal 'YYYY-MM-DD' atau id sesi
+  date?: string; // YYYY-MM-DD
+  sessionTitle?: string; // e.g. "Latihan Rutin"
   memberId: string;
   status: AttendanceStatus;
   notes?: string;
@@ -140,4 +143,4 @@ export interface ReminderLog {
   errorDetail?: string;
 }
 
-export type UserRole = 'ADMIN' | 'COACH' | 'MEMBER';
+export type UserRole = 'ADMIN' | 'MEMBER';

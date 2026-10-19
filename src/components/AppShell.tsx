@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useRole } from '@/context/RoleContext';
+import Link from 'next/link';
+import { ShieldAlert } from 'lucide-react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import Image from 'next/image';
@@ -10,10 +12,11 @@ import Image from 'next/image';
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isAuthenticated, isLoadingAuth } = useRole();
+  const { isAuthenticated, isLoadingAuth, role } = useRole();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const isLoginPage = pathname === '/login';
+  const isMemberAllowed = pathname === '/' || pathname === '/keuangan';
 
   // Route protection: If not logged in and not on login page, redirect to /login
   useEffect(() => {
@@ -21,6 +24,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       router.replace('/login');
     }
   }, [isLoadingAuth, isAuthenticated, isLoginPage, router]);
+
+  // Role protection: If Anggota (MEMBER) attempts to open forbidden pages, redirect to /
+  useEffect(() => {
+    if (!isLoadingAuth && isAuthenticated && role === 'MEMBER' && !isMemberAllowed && !isLoginPage) {
+      router.replace('/');
+    }
+  }, [isLoadingAuth, isAuthenticated, role, isMemberAllowed, isLoginPage, router]);
 
   // Background auto-reminder trigger (only active when logged in)
   useEffect(() => {
@@ -91,7 +101,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         <main className="flex-1 lg:pl-64 flex flex-col min-w-0 transition-all duration-200">
           <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
-            {children}
+            {role === 'MEMBER' && !isMemberAllowed ? (
+              <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-[#8F0000] mb-4 shadow-sm">
+                  <ShieldAlert className="w-8 h-8" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900 mb-2">Akses Khusus Pengurus</h2>
+                <p className="text-sm text-slate-500 max-w-md mb-6 leading-relaxed">
+                  Akun Anggota hanya memiliki akses untuk melihat <strong>Dashboard</strong> dan <strong>Laporan Keuangan</strong>. Menu ini tidak dapat diakses.
+                </p>
+                <Link
+                  href="/"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-smart-maroon to-smart-red text-white text-xs font-bold shadow-md hover:brightness-110 transition"
+                >
+                  Kembali ke Dashboard
+                </Link>
+              </div>
+            ) : (
+              children
+            )}
           </div>
           <footer className="border-t border-slate-200 py-6 text-center text-xs text-slate-500 bg-white shadow-xs">
             Akademi Voly Smart 09 &copy; {new Date().getFullYear()} &bull; Sistem Absensi, Kas &amp; Smart Reminder Voli
