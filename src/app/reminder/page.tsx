@@ -589,8 +589,16 @@ _- Pengurus ${academyName}_ ✨`;
                   className="w-full font-bold text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer"
                   icon={<MessageCircle className="w-4 h-4" />}
                 >
-                  Kirim / Bagikan ke Grup WhatsApp
+                  Buka Grup WhatsApp (Teks Otomatis Tersalin)
                 </Button>
+
+                <a
+                  href={`whatsapp://send?text=${encodeURIComponent(groupBroadcastText)}`}
+                  className="w-full py-2 px-3 rounded-xl bg-smart-dark border border-smart-border hover:border-smart-gold text-slate-300 hover:text-white font-medium text-xs flex items-center justify-center gap-1.5 transition text-center"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Buka di Aplikasi WhatsApp (Teks Otomatis Terisi)</span>
+                </a>
 
                 <Button
                   variant="outline"
@@ -604,14 +612,17 @@ _- Pengurus ${academyName}_ ✨`;
               </div>
 
               {/* Tips Petunjuk Penggunaan */}
-              <div className="p-3 rounded-xl bg-smart-dark/80 border border-smart-border text-[11px] text-slate-400 space-y-1.5">
-                <span className="font-semibold text-slate-300 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-smart-gold-light" />
-                  Cara Kerja Pengiriman Grup:
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 space-y-1.5 animate-in fade-in">
+                <span className="font-bold text-amber-300 flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  PENTING (Agar Tidak Muncul Error &quot;Pesan Kosong&quot;):
                 </span>
-                <p className="leading-relaxed">
-                  • <strong>Di HP / Smartphone:</strong> Tombol ini otomatis memunculkan aplikasi WhatsApp Anda untuk langsung memilih grup tujuan.<br />
-                  • <strong>Di Laptop / Komputer:</strong> WhatsApp Web tidak mengizinkan website luar menyuntikkan teks langsung ke dalam grup demi alasan keamanan anti-spam Meta. Oleh karena itu, saat tombol ditekan teks <strong>otomatis disalin ke clipboard</strong> dan WhatsApp Web dibuka &rarr; Anda tinggal klik grup Anda lalu tekan <strong>Paste (Ctrl + V)</strong> dan Kirim.
+                <p className="text-[11px] leading-relaxed text-slate-300">
+                  Saat grup WhatsApp terbuka, kolom chat memang sengaja dikosongkan oleh sistem keamanan WhatsApp. 
+                  <strong className="text-white block mt-1">
+                    👉 Cukup klik kolom chat WhatsApp Anda, lalu tekan <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-400/40 font-mono">Ctrl + V</kbd> (atau klik kanan &rarr; Tempel), lalu tekan Kirim!
+                  </strong>
+                  Seluruh isi pesan pengumuman yang rapi akan langsung muncul seketika karena sudah otomatis disalin oleh web.
                 </p>
               </div>
 
