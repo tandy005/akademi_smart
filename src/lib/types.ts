@@ -30,6 +30,7 @@ export interface Member {
   joinDate?: string;
   address?: string;
   notes?: string;
+  ktaToken?: string; // Tanda tangan digital HMAC anti-pemalsuan KTA
 }
 
 export function calculateMemberAge(member: { birthDate?: string; age?: number }): number {

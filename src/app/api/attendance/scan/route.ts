@@ -2,31 +2,49 @@ import { NextResponse } from 'next/server';
 import { getDatabaseAsync, saveDatabaseAsync } from '@/lib/storage';
 import { AttendanceRecord, Member } from '@/lib/types';
 import { getSessionUser } from '@/lib/auth-session';
+import { verifyMemberKtaSignature } from '@/lib/security';
 
 const DEFAULT_FIELD_PIN = process.env.FIELD_SCANNER_PIN || '0909';
 
+// Helper: Menghitung tanggal kalender zona waktu Indonesia (WIB / Asia/Jakarta)
+function getIndonesianDateString(d: Date = new Date()): string {
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(d);
+  } catch {
+    return d.toISOString().split('T')[0];
+  }
+}
+
 // Helper to parse QR payload
-function parseQrPayload(payload: string): { memberId?: string; nis?: string } {
+function parseQrPayload(payload: string): { memberId?: string; nis?: string; token?: string } {
   const trimmed = payload.trim();
   
   // Format URL Web (untuk Google Lens / Kamera HP biasa)
-  // Contoh: http://domain.com/absen?id=m-1&nis=SMART-2026-001
+  // Contoh: http://domain.com/absen?id=m-1&nis=SMART-2026-001&token=8f3b29c91a0d4e5f
   if (trimmed.includes('/absen?') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     try {
       const url = new URL(trimmed);
       const memberId = url.searchParams.get('id') || undefined;
       const nis = url.searchParams.get('nis') || undefined;
+      const token = url.searchParams.get('token') || undefined;
       if (memberId || nis) {
-        return { memberId, nis };
+        return { memberId, nis, token };
       }
     } catch {
       // Jika URL parsing gagal, coba regex sederhana
       const idMatch = trimmed.match(/[?&]id=([^&#]+)/);
       const nisMatch = trimmed.match(/[?&]nis=([^&#]+)/);
+      const tokenMatch = trimmed.match(/[?&]token=([^&#]+)/);
       if (idMatch || nisMatch) {
         return {
           memberId: idMatch ? decodeURIComponent(idMatch[1]) : undefined,
           nis: nisMatch ? decodeURIComponent(nisMatch[1]) : undefined,
+          token: tokenMatch ? decodeURIComponent(tokenMatch[1]) : undefined,
         };
       }
     }
@@ -67,7 +85,7 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const pin = searchParams.get('pin');
-    const scheduleId = searchParams.get('scheduleId') || new Date().toISOString().split('T')[0];
+    const scheduleId = searchParams.get('scheduleId') || getIndonesianDateString();
 
     const session = await getSessionUser();
     const isAuthorized = session?.role === 'ADMIN' || pin === DEFAULT_FIELD_PIN;
@@ -100,28 +118,19 @@ export async function GET(req: Request) {
   }
 }
 
-// POST: Rekam scan kehadiran atlet (dari Mode Pelatih atau Mode Kiosk Meja)
+// POST: Rekam scan kehadiran atlet (dari Mode Pelatih atau Mode Kiosk Meja atau Google Lens)
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { payload, pin, scheduleId: customScheduleId, notes } = body;
-
-    const session = await getSessionUser();
-    const isAuthorized = session?.role === 'ADMIN' || pin === DEFAULT_FIELD_PIN;
-
-    if (!isAuthorized) {
-      return NextResponse.json(
-        { error: 'PIN Presensi salah. Silakan masukkan PIN Lapangan yang benar.' },
-        { status: 401 }
-      );
-    }
+    const { payload, pin, scheduleId: customScheduleId, notes, token: directToken } = body;
 
     if (!payload) {
       return NextResponse.json({ error: 'Data QR Code tidak boleh kosong' }, { status: 400 });
     }
 
     const db = await getDatabaseAsync();
-    const { memberId, nis } = parseQrPayload(payload);
+    const { memberId, nis, token: payloadToken } = parseQrPayload(payload);
+    const token = directToken || payloadToken;
 
     // Cari member
     let member: Member | undefined;
@@ -143,7 +152,33 @@ export async function POST(req: Request) {
       );
     }
 
-    const todayDate = new Date().toISOString().split('T')[0];
+    // =========================================================================
+    // LAYER KEAMANAN ANTI-MANIPULASI:
+    // Jalur A: Di-scan langsung oleh Pelatih/Pengurus (Kamera PIN 0909 atau Sesi ADMIN) -> Sah!
+    // Jalur B: Tautan Publik Web / Google Lens -> Wajib lolos verifikasi tanda tangan HMAC resmi!
+    // =========================================================================
+    const session = await getSessionUser();
+    const isCoachOrAdmin = session?.role === 'ADMIN' || pin === DEFAULT_FIELD_PIN;
+
+    if (!isCoachOrAdmin) {
+      const isSignatureValid = verifyMemberKtaSignature(
+        member.id,
+        token || '',
+        member.registrationNumber
+      );
+
+      if (!isSignatureValid) {
+        return NextResponse.json(
+          {
+            error:
+              'Akses Ditolak: Tanda tangan digital KTA tidak valid atau ID telah dimanipulasi/ditebak.',
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    const todayDate = getIndonesianDateString();
     const scheduleId = customScheduleId || todayDate;
     const nowIso = new Date().toISOString();
 

@@ -32,6 +32,7 @@ function AbsenContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const nis = searchParams.get('nis');
+  const token = searchParams.get('token');
 
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
@@ -61,7 +62,7 @@ function AbsenContent() {
     }
   }, []);
 
-  const handleRecordAttendance = useCallback(async (targetId: string, targetNis?: string | null) => {
+  const handleRecordAttendance = useCallback(async (targetId: string, targetNis?: string | null, targetToken?: string | null) => {
     setLoading(true);
     setErrorMessage(null);
 
@@ -71,8 +72,8 @@ function AbsenContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           payload: targetId,
-          pin: '0909', // Default authorized field pin
-          notes: 'Presensi via Google Lens / Kamera HP',
+          token: targetToken || undefined,
+          notes: 'Presensi via Google Lens / Kamera HP (Terverifikasi HMAC)',
         }),
       });
 
@@ -98,11 +99,11 @@ function AbsenContent() {
 
   useEffect(() => {
     if (id || nis) {
-      handleRecordAttendance(id || nis || '', nis);
+      handleRecordAttendance(id || nis || '', nis, token);
     } else {
       setLoading(false);
     }
-  }, [id, nis, handleRecordAttendance]);
+  }, [id, nis, token, handleRecordAttendance]);
 
   const todayStr = new Date().toLocaleDateString('id-ID', {
     weekday: 'long',

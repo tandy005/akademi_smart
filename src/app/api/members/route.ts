@@ -2,10 +2,15 @@ import { NextResponse } from 'next/server';
 import { getDatabaseAsync, saveDatabaseAsync } from '@/lib/storage';
 import { Member } from '@/lib/types';
 import { requireAuth } from '@/lib/auth-session';
+import { generateMemberKtaSignature } from '@/lib/security';
 
 export async function GET() {
   const db = await getDatabaseAsync();
-  return NextResponse.json(db.members);
+  const membersWithTokens = db.members.map((m) => ({
+    ...m,
+    ktaToken: generateMemberKtaSignature(m.id, m.registrationNumber),
+  }));
+  return NextResponse.json(membersWithTokens);
 }
 
 export async function POST(req: Request) {
