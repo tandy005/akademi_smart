@@ -33,17 +33,22 @@ export default function KtaModal({
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [copiedNis, setCopiedNis] = useState(false);
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
-  const [origin, setOrigin] = useState<string>('http://localhost:3002');
+  // Default ke domain server production agar hasil cetak & download KTA selalu valid di Google Lens
+  const [origin, setOrigin] = useState<string>(
+    process.env.NEXT_PUBLIC_APP_URL || 'https://akademi-smart.vercel.app'
+  );
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.origin) {
+    if (process.env.NEXT_PUBLIC_APP_URL) {
+      setOrigin(process.env.NEXT_PUBLIC_APP_URL);
+    } else if (typeof window !== 'undefined' && window.location.origin.includes('vercel.app')) {
       setOrigin(window.location.origin);
     }
   }, []);
 
   const regNo = member?.registrationNumber || `SMART-2026-${member?.id?.replace('m-', '') || '001'}`;
-  // Dual Function: Format URL web agar langsung dikenali oleh Google Lens & Kamera HP biasa!
+  // Dual Function: Format URL web resmi server agar langsung dikenali oleh Google Lens & Kamera HP mana pun
   const qrPayload = member
     ? `${origin}/absen?id=${member.id}&nis=${encodeURIComponent(regNo)}`
     : '';
@@ -287,6 +292,9 @@ Berikut identitas KTA resmi atlet Akademi Voly Smart 09:
 
 📌 *Petunjuk Presensi Lapangan:*
 Tunjukkan QR Code pada KTA Digital ini kepada pelatih saat tiba di GOR/lapangan untuk pencatatan absensi otomatis 1 detik.
+
+🔗 *Tautan Presensi Mandiri / Google Lens:*
+${origin}/absen?id=${member.id}&nis=${encodeURIComponent(regNo)}
 
 _Akademi Bola Voli Smart 09 Sidoarjo_ ✨`;
 
