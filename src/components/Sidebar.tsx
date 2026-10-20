@@ -88,7 +88,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       href: '/reminder',
       icon: MessageSquareText,
       roles: ['ADMIN'],
-      badge: 'Auto 4 Jam',
+      badge: '1-Klik WA',
     },
   ];
 

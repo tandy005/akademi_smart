@@ -307,51 +307,321 @@
       "notes": "Anggota Baru"
     }
   ],
-  "schedules": [
+  "schedules": [],
+  "attendances": [
     {
-      "id": "sch-selasa",
-      "day": "Selasa",
-      "title": "Latihan Rutin Hari Selasa",
-      "category": "Semua Kategori",
-      "date": "2026-10-13",
-      "startTime": "20:00",
-      "endTime": "22:00",
-      "location": "Lapangan Smart 09 Taman Pondok Legi",
-      "coachName": "Pelatih Smart 09",
-      "focusMaterial": "Latihan Rutin",
-      "reminderSent": false,
-      "reminderHoursBefore": 4
+      "id": "att-2026-10-16-m-1",
+      "scheduleId": "2026-10-16",
+      "memberId": "m-1",
+      "status": "HADIR",
+      "notes": "Ditandai Hadir di Lokasi",
+      "recordedAt": "2026-10-20T07:23:37.027Z"
     },
     {
-      "id": "sch-kamis",
-      "day": "Kamis",
-      "title": "Latihan Rutin Hari Kamis",
-      "category": "Semua Kategori",
-      "date": "2026-10-15",
-      "startTime": "20:00",
-      "endTime": "22:00",
-      "location": "Lapangan Smart 09 Taman Pondok Legi",
-      "coachName": "Pelatih Smart 09",
-      "focusMaterial": "Latihan Rutin",
-      "reminderSent": false,
-      "reminderHoursBefore": 4
+      "id": "att-2026-10-20-m-9",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-9",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
     },
     {
-      "id": "sch-sabtu",
-      "day": "Sabtu",
-      "title": "Latihan Rutin Hari Sabtu",
-      "category": "Semua Kategori",
-      "date": "2026-10-17",
-      "startTime": "15:30",
-      "endTime": "20:00",
-      "location": "Lapangan Smart 09 Taman Pondok Legi",
-      "coachName": "Pelatih Smart 09",
-      "focusMaterial": "Latihan Rutin",
-      "reminderSent": false,
-      "reminderHoursBefore": 4
+      "id": "att-2026-10-20-m-12",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-12",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-6",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-6",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-7",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-7",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-13",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-13",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-3",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-3",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-8",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-8",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-4",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-4",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-11",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-11",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-16",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-16",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-17",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-17",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-14",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-14",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-18",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-18",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-19",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-19",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-2",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-2",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-1",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-1",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-10",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-10",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-5",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-5",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-20-m-15",
+      "scheduleId": "2026-10-20",
+      "memberId": "m-15",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:22:36.313Z"
+    },
+    {
+      "id": "att-2026-10-19-m-17",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-17",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-9",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-9",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-1",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-1",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-10",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-10",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-11",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-11",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-19",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-19",
+      "status": "ALPA",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-13",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-13",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-14",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-14",
+      "status": "ALPA",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-15",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-15",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-16",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-16",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-8",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-8",
+      "status": "SAKIT",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-18",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-18",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-12",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-12",
+      "status": "ALPA",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-2",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-2",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-3",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-3",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-4",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-4",
+      "status": "IZIN",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-5",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-5",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-6",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-6",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
+    },
+    {
+      "id": "att-2026-10-19-m-7",
+      "scheduleId": "2026-10-19",
+      "memberId": "m-7",
+      "status": "HADIR",
+      "notes": "",
+      "recordedAt": "2026-10-20T06:19:27.800Z"
     }
   ],
-  "attendances": [],
   "dues": [
     {
       "id": "due-m-18-2027-1",
@@ -378,18 +648,6 @@
       "note": "Lunas di awal"
     },
     {
-      "id": "due-m-2-2027-2",
-      "memberId": "m-2",
-      "month": 2,
-      "year": 2027,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202702-m-2-735",
-      "note": "Lunas di awal"
-    },
-    {
       "id": "due-m-18-2027-2",
       "memberId": "m-18",
       "month": 2,
@@ -399,6 +657,18 @@
       "paidAt": "2026-10-19T09:00:00.000Z",
       "paymentMethod": "Tunai",
       "receiptNumber": "KWT-202702-m-18-901",
+      "note": "Lunas di awal"
+    },
+    {
+      "id": "due-m-2-2027-2",
+      "memberId": "m-2",
+      "month": 2,
+      "year": 2027,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202702-m-2-735",
       "note": "Lunas di awal"
     },
     {
@@ -462,90 +732,6 @@
       "note": "Lunas di awal"
     },
     {
-      "id": "due-m-10-2026-10",
-      "memberId": "m-10",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-10-376",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-3-2026-10",
-      "memberId": "m-3",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-3-234",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-2-2026-10",
-      "memberId": "m-2",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-2-104",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-9-2026-10",
-      "memberId": "m-9",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-9-355",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-17-2026-10",
-      "memberId": "m-17",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-17-390",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-19-2026-10",
-      "memberId": "m-19",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T10:00:00Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-019",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-6-2026-10",
-      "memberId": "m-6",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-6-254",
-      "note": "Lunas"
-    },
-    {
       "id": "due-m-8-2026-10",
       "memberId": "m-8",
       "month": 10,
@@ -555,78 +741,6 @@
       "paidAt": "2026-10-19T09:00:00.000Z",
       "paymentMethod": "Tunai",
       "receiptNumber": "KWT-202610-m-8-102",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-11-2026-10",
-      "memberId": "m-11",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-11-828",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-13-2026-10",
-      "memberId": "m-13",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-13-303",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-15-2026-10",
-      "memberId": "m-15",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-15-408",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-18-2026-10",
-      "memberId": "m-18",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-18-985",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-16-2026-10",
-      "memberId": "m-16",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-16-494",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-4-2026-10",
-      "memberId": "m-4",
-      "month": 10,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202610-m-4-381",
       "note": "Lunas"
     },
     {
@@ -654,12 +768,16 @@
       "note": "Lunas"
     },
     {
-      "id": "due-m-14-2026-10",
-      "memberId": "m-14",
+      "id": "due-m-4-2026-10",
+      "memberId": "m-4",
       "month": 10,
       "year": 2026,
       "amount": 10000,
-      "isPaid": false
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-4-381",
+      "note": "Lunas"
     },
     {
       "id": "due-m-1-2026-10",
@@ -671,6 +789,86 @@
       "paidAt": "2026-10-19T09:00:00.000Z",
       "paymentMethod": "Tunai",
       "receiptNumber": "KWT-202610-m-1-249",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-2-2026-10",
+      "memberId": "m-2",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-2-104",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-17-2026-10",
+      "memberId": "m-17",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-17-390",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-9-2026-10",
+      "memberId": "m-9",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-9-355",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-11-2026-10",
+      "memberId": "m-11",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-11-828",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-14-2026-10",
+      "memberId": "m-14",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
+      "id": "due-m-15-2026-10",
+      "memberId": "m-15",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-15-408",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-19-2026-10",
+      "memberId": "m-19",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T10:00:00Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-019",
       "note": "Lunas"
     },
     {
@@ -686,32 +884,100 @@
       "note": "Lunas"
     },
     {
-      "id": "due-m-9-2026-11",
-      "memberId": "m-9",
-      "month": 11,
+      "id": "due-m-13-2026-10",
+      "memberId": "m-13",
+      "month": 10,
       "year": 2026,
       "amount": 10000,
-      "isPaid": false
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-13-303",
+      "note": "Lunas"
     },
     {
-      "id": "due-m-15-2026-11",
-      "memberId": "m-15",
-      "month": 11,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": false
-    },
-    {
-      "id": "due-m-3-2026-11",
+      "id": "due-m-3-2026-10",
       "memberId": "m-3",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-3-234",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-10-2026-10",
+      "memberId": "m-10",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-10-376",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-18-2026-10",
+      "memberId": "m-18",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-18-985",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-16-2026-10",
+      "memberId": "m-16",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-16-494",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-6-2026-10",
+      "memberId": "m-6",
+      "month": 10,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202610-m-6-254",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-12-2026-11",
+      "memberId": "m-12",
       "month": 11,
       "year": 2026,
       "amount": 10000,
       "isPaid": false
     },
     {
-      "id": "due-m-1-2026-11",
-      "memberId": "m-1",
+      "id": "due-m-18-2026-11",
+      "memberId": "m-18",
+      "month": 11,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202611-m-18-595",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-5-2026-11",
+      "memberId": "m-5",
       "month": 11,
       "year": 2026,
       "amount": 10000,
@@ -730,32 +996,36 @@
       "note": "Lunas"
     },
     {
-      "id": "due-m-19-2026-11",
-      "memberId": "m-19",
+      "id": "due-m-3-2026-11",
+      "memberId": "m-3",
       "month": 11,
       "year": 2026,
       "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T10:00:00Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202611-019",
-      "note": "Lunas"
+      "isPaid": false
     },
     {
-      "id": "due-m-18-2026-11",
-      "memberId": "m-18",
+      "id": "due-m-7-2026-11",
+      "memberId": "m-7",
+      "month": 11,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
+      "id": "due-m-16-2026-11",
+      "memberId": "m-16",
       "month": 11,
       "year": 2026,
       "amount": 10000,
       "isPaid": true,
       "paidAt": "2026-10-19T09:00:00.000Z",
       "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202611-m-18-595",
+      "receiptNumber": "KWT-202611-m-16-468",
       "note": "Lunas"
     },
     {
-      "id": "due-m-11-2026-11",
-      "memberId": "m-11",
+      "id": "due-m-8-2026-11",
+      "memberId": "m-8",
       "month": 11,
       "year": 2026,
       "amount": 10000,
@@ -782,30 +1052,6 @@
       "note": "Lunas"
     },
     {
-      "id": "due-m-4-2026-11",
-      "memberId": "m-4",
-      "month": 11,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202611-m-4-778",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-16-2026-11",
-      "memberId": "m-16",
-      "month": 11,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202611-m-16-468",
-      "note": "Lunas"
-    },
-    {
       "id": "due-m-14-2026-11",
       "memberId": "m-14",
       "month": 11,
@@ -814,12 +1060,16 @@
       "isPaid": false
     },
     {
-      "id": "due-m-13-2026-11",
-      "memberId": "m-13",
+      "id": "due-m-19-2026-11",
+      "memberId": "m-19",
       "month": 11,
       "year": 2026,
       "amount": 10000,
-      "isPaid": false
+      "isPaid": true,
+      "paidAt": "2026-10-19T10:00:00Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202611-019",
+      "note": "Lunas"
     },
     {
       "id": "due-m-6-2026-11",
@@ -834,133 +1084,53 @@
       "note": "Lunas"
     },
     {
-      "id": "due-m-12-2026-11",
-      "memberId": "m-12",
-      "month": 11,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": false
-    },
-    {
-      "id": "due-m-7-2026-11",
-      "memberId": "m-7",
-      "month": 11,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": false
-    },
-    {
-      "id": "due-m-5-2026-11",
-      "memberId": "m-5",
-      "month": 11,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": false
-    },
-    {
-      "id": "due-m-8-2026-11",
-      "memberId": "m-8",
-      "month": 11,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": false
-    },
-    {
-      "id": "due-m-8-2026-12",
-      "memberId": "m-8",
-      "month": 12,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": false
-    },
-    {
-      "id": "due-m-1-2026-12",
-      "memberId": "m-1",
-      "month": 12,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": false
-    },
-    {
-      "id": "due-m-4-2026-12",
-      "memberId": "m-4",
-      "month": 12,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202612-m-4-560",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-2-2026-12",
-      "memberId": "m-2",
-      "month": 12,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": true,
-      "paidAt": "2026-10-19T09:00:00.000Z",
-      "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202612-m-2-274",
-      "note": "Lunas"
-    },
-    {
-      "id": "due-m-3-2026-12",
-      "memberId": "m-3",
-      "month": 12,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": false
-    },
-    {
-      "id": "due-m-15-2026-12",
+      "id": "due-m-15-2026-11",
       "memberId": "m-15",
-      "month": 12,
+      "month": 11,
       "year": 2026,
       "amount": 10000,
       "isPaid": false
     },
     {
-      "id": "due-m-13-2026-12",
+      "id": "due-m-13-2026-11",
       "memberId": "m-13",
-      "month": 12,
+      "month": 11,
       "year": 2026,
       "amount": 10000,
       "isPaid": false
     },
     {
-      "id": "due-m-10-2026-12",
-      "memberId": "m-10",
-      "month": 12,
+      "id": "due-m-1-2026-11",
+      "memberId": "m-1",
+      "month": 11,
       "year": 2026,
       "amount": 10000,
       "isPaid": false
     },
     {
-      "id": "due-m-6-2026-12",
-      "memberId": "m-6",
-      "month": 12,
+      "id": "due-m-4-2026-11",
+      "memberId": "m-4",
+      "month": 11,
       "year": 2026,
       "amount": 10000,
       "isPaid": true,
       "paidAt": "2026-10-19T09:00:00.000Z",
       "paymentMethod": "Tunai",
-      "receiptNumber": "KWT-202612-m-6-126",
+      "receiptNumber": "KWT-202611-m-4-778",
       "note": "Lunas"
     },
     {
-      "id": "due-m-17-2026-12",
-      "memberId": "m-17",
-      "month": 12,
+      "id": "due-m-9-2026-11",
+      "memberId": "m-9",
+      "month": 11,
       "year": 2026,
       "amount": 10000,
       "isPaid": false
     },
     {
-      "id": "due-m-12-2026-12",
-      "memberId": "m-12",
-      "month": 12,
+      "id": "due-m-11-2026-11",
+      "memberId": "m-11",
+      "month": 11,
       "year": 2026,
       "amount": 10000,
       "isPaid": false
@@ -986,14 +1156,6 @@
       "note": "Lunas"
     },
     {
-      "id": "due-m-11-2026-12",
-      "memberId": "m-11",
-      "month": 12,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": false
-    },
-    {
       "id": "due-m-19-2026-12",
       "memberId": "m-19",
       "month": 12,
@@ -1006,14 +1168,6 @@
       "note": "Lunas"
     },
     {
-      "id": "due-m-9-2026-12",
-      "memberId": "m-9",
-      "month": 12,
-      "year": 2026,
-      "amount": 10000,
-      "isPaid": false
-    },
-    {
       "id": "due-m-14-2026-12",
       "memberId": "m-14",
       "month": 12,
@@ -1022,8 +1176,104 @@
       "isPaid": false
     },
     {
+      "id": "due-m-10-2026-12",
+      "memberId": "m-10",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
+      "id": "due-m-11-2026-12",
+      "memberId": "m-11",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
+      "id": "due-m-15-2026-12",
+      "memberId": "m-15",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
+      "id": "due-m-3-2026-12",
+      "memberId": "m-3",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
+      "id": "due-m-12-2026-12",
+      "memberId": "m-12",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
+      "id": "due-m-17-2026-12",
+      "memberId": "m-17",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
+      "id": "due-m-6-2026-12",
+      "memberId": "m-6",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202612-m-6-126",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-2-2026-12",
+      "memberId": "m-2",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202612-m-2-274",
+      "note": "Lunas"
+    },
+    {
+      "id": "due-m-9-2026-12",
+      "memberId": "m-9",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
+      "id": "due-m-8-2026-12",
+      "memberId": "m-8",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
       "id": "due-m-5-2026-12",
       "memberId": "m-5",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
+      "id": "due-m-13-2026-12",
+      "memberId": "m-13",
       "month": 12,
       "year": 2026,
       "amount": 10000,
@@ -1040,64 +1290,29 @@
       "paymentMethod": "Tunai",
       "receiptNumber": "KWT-202612-m-16-111",
       "note": "Lunas"
+    },
+    {
+      "id": "due-m-1-2026-12",
+      "memberId": "m-1",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": false
+    },
+    {
+      "id": "due-m-4-2026-12",
+      "memberId": "m-4",
+      "month": 12,
+      "year": 2026,
+      "amount": 10000,
+      "isPaid": true,
+      "paidAt": "2026-10-19T09:00:00.000Z",
+      "paymentMethod": "Tunai",
+      "receiptNumber": "KWT-202612-m-4-560",
+      "note": "Lunas"
     }
   ],
   "transactions": [
-    {
-      "id": "tx-due-due-m-16-2026-11",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 11/2026 - Bu Eko",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-16-2026-11",
-      "receiptNumber": "KWT-202611-m-16-468",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
-      "id": "tx-due-due-m-16-2026-12",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 12/2026 - Bu Eko",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-16-2026-12",
-      "receiptNumber": "KWT-202612-m-16-111",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
-      "id": "tx-due-due-m-2-2026-10",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 10/2026 - Syafiq",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-2-2026-10",
-      "receiptNumber": "KWT-202610-m-2-104",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
-      "id": "tx-due-due-m-2-2026-11",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 11/2026 - Syafiq",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-2-2026-11",
-      "receiptNumber": "KWT-202611-m-2-638",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
-      "id": "tx-due-due-m-6-2026-10",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 10/2026 - Shefty",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-6-2026-10",
-      "receiptNumber": "KWT-202610-m-6-254",
-      "recordedBy": "Bendahara Kas"
-    },
     {
       "id": "tx-due-due-m-6-2026-11",
       "type": "INCOME",
@@ -1107,39 +1322,6 @@
       "date": "2026-10-19",
       "relatedDueId": "due-m-6-2026-11",
       "receiptNumber": "KWT-202611-m-6-744",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
-      "id": "tx-due-due-m-6-2026-12",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 12/2026 - Shefty",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-6-2026-12",
-      "receiptNumber": "KWT-202612-m-6-126",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
-      "id": "tx-due-due-m-5-2026-10",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 10/2026 - Nindy",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-5-2026-10",
-      "receiptNumber": "KWT-202610-m-5-909",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
-      "id": "tx-due-due-m-2-2026-12",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 12/2026 - Syafiq",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-2-2026-12",
-      "receiptNumber": "KWT-202612-m-2-274",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1176,25 +1358,102 @@
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-2-2027-1",
+      "id": "tx-due-due-m-6-2026-12",
       "type": "INCOME",
       "category": "Iuran Kas",
       "amount": 10000,
-      "description": "Iuran Kas Bulan 1/2027 (Dibayar di Awal) - Syafiq",
+      "description": "Iuran Kas Bulan 12/2026 - Shefty",
       "date": "2026-10-19",
-      "relatedDueId": "due-m-2-2027-1",
-      "receiptNumber": "KWT-202701-m-2-984",
+      "relatedDueId": "due-m-6-2026-12",
+      "receiptNumber": "KWT-202612-m-6-126",
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-2-2027-2",
+      "id": "tx-due-due-m-16-2026-11",
       "type": "INCOME",
       "category": "Iuran Kas",
       "amount": 10000,
-      "description": "Iuran Kas Bulan 2/2027 (Dibayar di Awal) - Syafiq",
+      "description": "Iuran Kas Bulan 11/2026 - Bu Eko",
       "date": "2026-10-19",
-      "relatedDueId": "due-m-2-2027-2",
-      "receiptNumber": "KWT-202702-m-2-735",
+      "relatedDueId": "due-m-16-2026-11",
+      "receiptNumber": "KWT-202611-m-16-468",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-16-2026-12",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 12/2026 - Bu Eko",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-16-2026-12",
+      "receiptNumber": "KWT-202612-m-16-111",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-2-2026-11",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 11/2026 - Syafiq",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-2-2026-11",
+      "receiptNumber": "KWT-202611-m-2-638",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-6-2026-10",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 10/2026 - Shefty",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-6-2026-10",
+      "receiptNumber": "KWT-202610-m-6-254",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-4-2026-10",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 10/2026 - Cllara",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-4-2026-10",
+      "receiptNumber": "KWT-202610-m-4-381",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-5-2026-10",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 10/2026 - Nindy",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-5-2026-10",
+      "receiptNumber": "KWT-202610-m-5-909",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-2-2026-12",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 12/2026 - Syafiq",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-2-2026-12",
+      "receiptNumber": "KWT-202612-m-2-274",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-15-2026-10",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 10/2026 - Taufiq",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-15-2026-10",
+      "receiptNumber": "KWT-202610-m-15-408",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1264,36 +1523,14 @@
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-2-2027-3",
+      "id": "tx-due-due-m-2-2027-1",
       "type": "INCOME",
       "category": "Iuran Kas",
       "amount": 10000,
-      "description": "Iuran Kas Bulan 3/2027 (Dibayar di Awal) - Syafiq",
+      "description": "Iuran Kas Bulan 1/2027 (Dibayar di Awal) - Syafiq",
       "date": "2026-10-19",
-      "relatedDueId": "due-m-2-2027-3",
-      "receiptNumber": "KWT-202703-m-2-999",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
-      "id": "tx-due-due-m-4-2026-10",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 10/2026 - Cllara",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-4-2026-10",
-      "receiptNumber": "KWT-202610-m-4-381",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
-      "id": "tx-due-due-m-2-2027-5",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 5/2027 (Dibayar di Awal) - Syafiq",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-2-2027-5",
-      "receiptNumber": "KWT-202705-m-2-142",
+      "relatedDueId": "due-m-2-2027-1",
+      "receiptNumber": "KWT-202701-m-2-984",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1305,6 +1542,17 @@
       "date": "2026-10-19",
       "relatedDueId": "due-m-2-2027-6",
       "receiptNumber": "KWT-202706-m-2-504",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-2-2027-2",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 2/2027 (Dibayar di Awal) - Syafiq",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-2-2027-2",
+      "receiptNumber": "KWT-202702-m-2-735",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1330,14 +1578,14 @@
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-15-2026-10",
+      "id": "tx-due-due-m-2-2027-3",
       "type": "INCOME",
       "category": "Iuran Kas",
       "amount": 10000,
-      "description": "Iuran Kas Bulan 10/2026 - Taufiq",
+      "description": "Iuran Kas Bulan 3/2027 (Dibayar di Awal) - Syafiq",
       "date": "2026-10-19",
-      "relatedDueId": "due-m-15-2026-10",
-      "receiptNumber": "KWT-202610-m-15-408",
+      "relatedDueId": "due-m-2-2027-3",
+      "receiptNumber": "KWT-202703-m-2-999",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1352,14 +1600,14 @@
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-17-2026-10",
+      "id": "tx-due-due-m-2-2027-5",
       "type": "INCOME",
       "category": "Iuran Kas",
       "amount": 10000,
-      "description": "Iuran Kas Bulan 10/2026 - Ryo",
+      "description": "Iuran Kas Bulan 5/2027 (Dibayar di Awal) - Syafiq",
       "date": "2026-10-19",
-      "relatedDueId": "due-m-17-2026-10",
-      "receiptNumber": "KWT-202610-m-17-390",
+      "relatedDueId": "due-m-2-2027-5",
+      "receiptNumber": "KWT-202705-m-2-142",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1385,25 +1633,14 @@
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-12-2026-10",
+      "id": "tx-due-due-m-18-2027-2",
       "type": "INCOME",
       "category": "Iuran Kas",
       "amount": 10000,
-      "description": "Iuran Kas Bulan 10/2026 - Fajar",
+      "description": "Iuran Kas Bulan 2/2027 (Dibayar di Awal) - Mas Winata",
       "date": "2026-10-19",
-      "relatedDueId": "due-m-12-2026-10",
-      "receiptNumber": "KWT-202610-m-12-967",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
-      "id": "tx-due-due-m-13-2026-10",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 10/2026 - Alben",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-13-2026-10",
-      "receiptNumber": "KWT-202610-m-13-303",
+      "relatedDueId": "due-m-18-2027-2",
+      "receiptNumber": "KWT-202702-m-18-901",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1418,14 +1655,14 @@
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-18-2026-11",
+      "id": "tx-due-due-m-17-2026-10",
       "type": "INCOME",
       "category": "Iuran Kas",
       "amount": 10000,
-      "description": "Iuran Kas Bulan 11/2026 - Mas Winata",
+      "description": "Iuran Kas Bulan 10/2026 - Ryo",
       "date": "2026-10-19",
-      "relatedDueId": "due-m-18-2026-11",
-      "receiptNumber": "KWT-202611-m-18-595",
+      "relatedDueId": "due-m-17-2026-10",
+      "receiptNumber": "KWT-202610-m-17-390",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1451,14 +1688,47 @@
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-18-2027-2",
+      "id": "tx-due-due-m-12-2026-10",
       "type": "INCOME",
       "category": "Iuran Kas",
       "amount": 10000,
-      "description": "Iuran Kas Bulan 2/2027 (Dibayar di Awal) - Mas Winata",
+      "description": "Iuran Kas Bulan 10/2026 - Fajar",
       "date": "2026-10-19",
-      "relatedDueId": "due-m-18-2027-2",
-      "receiptNumber": "KWT-202702-m-18-901",
+      "relatedDueId": "due-m-12-2026-10",
+      "receiptNumber": "KWT-202610-m-12-967",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-13-2026-10",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 10/2026 - Alben",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-13-2026-10",
+      "receiptNumber": "KWT-202610-m-13-303",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-10-2026-11",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 11/2026 - Zahra",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-10-2026-11",
+      "receiptNumber": "KWT-202611-m-10-754",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-18-2026-11",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 11/2026 - Mas Winata",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-18-2026-11",
+      "receiptNumber": "KWT-202611-m-18-595",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1473,14 +1743,14 @@
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-10-2026-11",
+      "id": "tx-due-due-m-2-2026-10",
       "type": "INCOME",
       "category": "Iuran Kas",
       "amount": 10000,
-      "description": "Iuran Kas Bulan 11/2026 - Zahra",
+      "description": "Iuran Kas Bulan 10/2026 - Syafiq",
       "date": "2026-10-19",
-      "relatedDueId": "due-m-10-2026-11",
-      "receiptNumber": "KWT-202611-m-10-754",
+      "relatedDueId": "due-m-2-2026-10",
+      "receiptNumber": "KWT-202610-m-2-104",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1551,16 +1821,6 @@
       "recordedBy": "Bendahara Smart 09"
     },
     {
-      "id": "tx-202608-04",
-      "type": "EXPENSE",
-      "category": "Peralatan/Bola",
-      "amount": 620000,
-      "description": "Membeli Bola Voli Mikasa 2200 Super Gold",
-      "date": "2026-08-20",
-      "receiptNumber": "KAS-OUT-20260820-1",
-      "recordedBy": "Pengurus Smart 09"
-    },
-    {
       "id": "tx-202608-05",
       "type": "EXPENSE",
       "category": "Peralatan/Bola",
@@ -1578,6 +1838,16 @@
       "description": "Sumbangan Donatur (Penutup Kekurangan Pengadaan Kaos & Bola)",
       "date": "2026-08-20",
       "receiptNumber": "KAS-IN-20260820-DONATUR",
+      "recordedBy": "Pengurus Smart 09"
+    },
+    {
+      "id": "tx-202608-04",
+      "type": "EXPENSE",
+      "category": "Peralatan/Bola",
+      "amount": 620000,
+      "description": "Membeli Bola Voli Mikasa 2200 Super Gold",
+      "date": "2026-08-20",
+      "receiptNumber": "KAS-OUT-20260820-1",
       "recordedBy": "Pengurus Smart 09"
     },
     {

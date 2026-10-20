@@ -32,23 +32,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [isLoadingAuth, isAuthenticated, role, isMemberAllowed, isLoginPage, router]);
 
-  // Background auto-reminder trigger (only active when logged in)
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const triggerAutoReminder = async () => {
-      try {
-        await fetch('/api/reminder/cron');
-      } catch (err) {
-        console.warn('Auto-reminder background check error:', err);
-      }
-    };
-
-    triggerAutoReminder();
-    const interval = setInterval(triggerAutoReminder, 120000);
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
-
   // 1. If currently on Login Page, render only login page without any menus, sidebar, or header
   if (isLoginPage) {
     return (
