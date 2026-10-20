@@ -165,6 +165,11 @@ Mari hadir tepat waktu dan semangat berlatih bersama! 💪🔥
 _- Pengurus ${academyName}_ ✨`;
   }, [activeSchedule, academyName]);
 
+  // URL untuk membagikan pengumuman langsung ke Grup WhatsApp
+  const waGroupShareUrl = useMemo(() => {
+    return `https://api.whatsapp.com/send?text=${encodeURIComponent(groupBroadcastText)}`;
+  }, [groupBroadcastText]);
+
   // Copy Group Broadcast to Clipboard
   const handleCopyGroupBroadcast = () => {
     navigator.clipboard.writeText(groupBroadcastText);
@@ -228,27 +233,27 @@ _- Pengurus ${academyName}_ ✨`;
         subtitle="Kirim pengumuman latihan ke grup WhatsApp dan kirim pesan pengingat personal ke atlet/wali murid dengan 1 klik (100% Gratis & langsung via WhatsApp Anda)."
         actions={
           <div className="flex items-center gap-2">
-            <Button
-              variant="gold"
-              size="sm"
-              onClick={handleCopyGroupBroadcast}
-              icon={<Copy className="w-4 h-4" />}
-            >
-              {copiedGroupMessage ? 'Tersalin!' : 'Salin Pengumuman Grup'}
-            </Button>
             <a
-              href="https://web.whatsapp.com"
+              href={waGroupShareUrl}
               target="_blank"
               rel="noopener noreferrer"
             >
               <Button
-                variant="outline"
+                variant="gold"
                 size="sm"
-                icon={<ExternalLink className="w-4 h-4" />}
+                icon={<MessageCircle className="w-4 h-4" />}
               >
-                Buka WhatsApp Web
+                Kirim ke Grup WA
               </Button>
             </a>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyGroupBroadcast}
+              icon={<Copy className="w-4 h-4" />}
+            >
+              {copiedGroupMessage ? 'Tersalin!' : 'Salin Format'}
+            </Button>
           </div>
         }
       />
@@ -512,16 +517,36 @@ _- Pengurus ${academyName}_ ✨`;
                 {groupBroadcastText}
               </div>
 
-              <div className="flex gap-2 pt-1">
+              <div className="flex flex-col gap-2 pt-1">
+                <a
+                  href={waGroupShareUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md cursor-pointer"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Kirim Langsung ke Grup WhatsApp</span>
+                </a>
+
                 <Button
-                  variant="primary"
+                  variant="outline"
                   size="sm"
                   onClick={handleCopyGroupBroadcast}
-                  className="w-full font-bold"
+                  className="w-full font-semibold"
                   icon={<Copy className="w-4 h-4" />}
                 >
-                  {copiedGroupMessage ? 'Format Berhasil Disalin!' : 'Salin Format Pengumuman Grup'}
+                  {copiedGroupMessage ? 'Format Berhasil Disalin!' : 'Salin Format Teks Pengumuman'}
                 </Button>
+              </div>
+
+              <div className="p-3 rounded-xl bg-smart-dark/80 border border-smart-border text-[11px] text-slate-400 space-y-1">
+                <span className="font-semibold text-slate-300 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-smart-gold-light" />
+                  Cara Kirim ke Grup:
+                </span>
+                <p className="leading-relaxed">
+                  Klik tombol hijau <strong>&quot;Kirim Langsung ke Grup WhatsApp&quot;</strong> di atas, WhatsApp akan otomatis terbuka dan memunculkan daftar chat/grup. Pilih nama <strong>Grup Akademi / Wali Murid</strong> Anda &rarr; seluruh isi teks pengumuman sudah otomatis tertempel di kolom pesan, tinggal tekan tombol <strong>Kirim (Send)</strong>!
+                </p>
               </div>
             </CardContent>
           </Card>
