@@ -62,7 +62,9 @@ export default function ReminderPage() {
   const [selectedScheduleId, setSelectedScheduleId] = useState<string>('');
   const [academyName, setAcademyName] = useState('Akademi Voly Smart 09');
   const [messageTemplate, setMessageTemplate] = useState<string>('');
-  const [groupLink, setGroupLink] = useState<string>('');
+  const [groupLink, setGroupLink] = useState<string>(
+    'https://chat.whatsapp.com/LpqwManvzcd9akuArzDvIw?s=cl&p=a&mlu=4&ilr=4'
+  );
 
   const [loading, setLoading] = useState(true);
   const [savingTemplate, setSavingTemplate] = useState(false);

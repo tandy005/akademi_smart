@@ -36,6 +36,7 @@ const INITIAL_DATA: AppData = {
     apiKey: '',
     senderNumber: '081234567890',
     webhookUrl: '',
+    groupLink: 'https://chat.whatsapp.com/LpqwManvzcd9akuArzDvIw?s=cl&p=a&mlu=4&ilr=4',
     autoReminderEnabled: true,
     reminderHoursBefore: 4,
     messageTemplate: `🏐 *PENGINGAT LATIHAN BOLA VOLI* 🏐\n\nHalo *{nama}*,\nJangan lupa jadwal latihan bola voli hari ini:\n\n📅 *Hari/Tanggal:* {tanggal}\n⏰ *Waktu:* {jam} WIB *(Harap hadir 15 menit sebelumnya)*\n📍 *Lokasi:* {lokasi}\n👨‍🏫 *Pelatih:* Coach {pelatih}\n📋 *Materi:* {materi}\n\nPastikan membawa jersey latihan, sepatu voli, dan botol minum. Semangat berlatih! 💪🔥\n_- Pengurus {akademi}_`,
