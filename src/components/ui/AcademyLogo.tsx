@@ -13,7 +13,7 @@ interface AcademyLogoProps {
 export default function AcademyLogo({
   size = 'md',
   showText = true,
-  textSubtitle = 'Volleyball Academy',
+  textSubtitle = '',
   className = '',
 }: AcademyLogoProps) {
   const [imageError, setImageError] = useState(false);
