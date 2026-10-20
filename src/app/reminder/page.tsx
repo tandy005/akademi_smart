@@ -62,9 +62,11 @@ export default function ReminderPage() {
   const [selectedScheduleId, setSelectedScheduleId] = useState<string>('');
   const [academyName, setAcademyName] = useState('Akademi Voly Smart 09');
   const [messageTemplate, setMessageTemplate] = useState<string>('');
+  const [groupLink, setGroupLink] = useState<string>('');
 
   const [loading, setLoading] = useState(true);
   const [savingTemplate, setSavingTemplate] = useState(false);
+  const [savingGroupLink, setSavingGroupLink] = useState(false);
   const [copiedGroupMessage, setCopiedGroupMessage] = useState(false);
   const [copiedMemberId, setCopiedMemberId] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
@@ -104,6 +106,9 @@ export default function ReminderPage() {
           const remData = await remRes.json();
           if (remData.config?.messageTemplate) {
             setMessageTemplate(remData.config.messageTemplate);
+          }
+          if (remData.config?.groupLink) {
+            setGroupLink(remData.config.groupLink);
           }
           if (remData.academyName) {
             setAcademyName(remData.academyName);
@@ -165,10 +170,72 @@ Mari hadir tepat waktu dan semangat berlatih bersama! 💪🔥
 _- Pengurus ${academyName}_ ✨`;
   }, [activeSchedule, academyName]);
 
-  // URL untuk membagikan pengumuman langsung ke Grup WhatsApp
-  const waGroupShareUrl = useMemo(() => {
-    return `https://api.whatsapp.com/send?text=${encodeURIComponent(groupBroadcastText)}`;
-  }, [groupBroadcastText]);
+  // Fungsi pintar membagikan langsung ke Grup WhatsApp
+  const handleShareToGroup = async () => {
+    // 1. Selalu salin teks ke clipboard terlebih dahulu
+    try {
+      await navigator.clipboard.writeText(groupBroadcastText);
+      setCopiedGroupMessage(true);
+      setTimeout(() => setCopiedGroupMessage(false), 4000);
+    } catch {}
+
+    // 2. Di HP/Smartphone (Android & iOS): Gunakan Web Share API resmi
+    // Fitur ini otomatis membuka WhatsApp dan menampilkan pemilih kontak/grup!
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: `Pengumuman Latihan ${academyName}`,
+          text: groupBroadcastText,
+        });
+        setSuccessToast('✅ Pesan berhasil dibagikan ke WhatsApp!');
+        setTimeout(() => setSuccessToast(null), 4000);
+        return;
+      } catch (err: unknown) {
+        if ((err as Error)?.name === 'AbortError') {
+          return;
+        }
+      }
+    }
+
+    // 3. Di Laptop/Desktop (WhatsApp Web tidak mengizinkan inject teks otomatis ke grup demi proteksi spam)
+    // Jika ada link grup yang disimpan pengurus, buka link grup tersebut!
+    // Jika tidak, buka web.whatsapp.com
+    const targetUrl = groupLink?.trim() || 'https://web.whatsapp.com';
+    window.open(targetUrl, '_blank');
+
+    setSuccessToast(
+      '📋 Teks pengumuman SUDAH OTOMATIS TERSALIN! Di WhatsApp Web, klik grup latihan Anda lalu tekan Tempel / Paste (Ctrl + V) dan Kirim.'
+    );
+  };
+
+  // Simpan tautan link grup WhatsApp
+  const handleSaveGroupLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingGroupLink(true);
+    try {
+      const res = await fetch('/api/reminder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'UPDATE_CONFIG',
+          config: {
+            groupLink,
+          },
+        }),
+      });
+
+      if (res.ok) {
+        setSuccessToast('✅ Tautan link grup WhatsApp berhasil disimpan!');
+        setTimeout(() => setSuccessToast(null), 3500);
+      } else {
+        alert('Gagal menyimpan link grup');
+      }
+    } catch {
+      alert('Terjadi kesalahan jaringan');
+    } finally {
+      setSavingGroupLink(false);
+    }
+  };
 
   // Copy Group Broadcast to Clipboard
   const handleCopyGroupBroadcast = () => {
@@ -233,19 +300,14 @@ _- Pengurus ${academyName}_ ✨`;
         subtitle="Kirim pengumuman latihan ke grup WhatsApp dan kirim pesan pengingat personal ke atlet/wali murid dengan 1 klik (100% Gratis & langsung via WhatsApp Anda)."
         actions={
           <div className="flex items-center gap-2">
-            <a
-              href={waGroupShareUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Button
+              variant="gold"
+              size="sm"
+              onClick={handleShareToGroup}
+              icon={<MessageCircle className="w-4 h-4" />}
             >
-              <Button
-                variant="gold"
-                size="sm"
-                icon={<MessageCircle className="w-4 h-4" />}
-              >
-                Kirim ke Grup WA
-              </Button>
-            </a>
+              Kirim ke Grup WA
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -518,15 +580,15 @@ _- Pengurus ${academyName}_ ✨`;
               </div>
 
               <div className="flex flex-col gap-2 pt-1">
-                <a
-                  href={waGroupShareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md cursor-pointer"
+                <Button
+                  variant="gold"
+                  size="md"
+                  onClick={handleShareToGroup}
+                  className="w-full font-bold text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer"
+                  icon={<MessageCircle className="w-4 h-4" />}
                 >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Kirim Langsung ke Grup WhatsApp</span>
-                </a>
+                  Kirim / Bagikan ke Grup WhatsApp
+                </Button>
 
                 <Button
                   variant="outline"
@@ -539,13 +601,46 @@ _- Pengurus ${academyName}_ ✨`;
                 </Button>
               </div>
 
-              <div className="p-3 rounded-xl bg-smart-dark/80 border border-smart-border text-[11px] text-slate-400 space-y-1">
+              {/* Tips Petunjuk Penggunaan */}
+              <div className="p-3 rounded-xl bg-smart-dark/80 border border-smart-border text-[11px] text-slate-400 space-y-1.5">
                 <span className="font-semibold text-slate-300 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-smart-gold-light" />
-                  Cara Kirim ke Grup:
+                  Cara Kerja Pengiriman Grup:
                 </span>
                 <p className="leading-relaxed">
-                  Klik tombol hijau <strong>&quot;Kirim Langsung ke Grup WhatsApp&quot;</strong> di atas, WhatsApp akan otomatis terbuka dan memunculkan daftar chat/grup. Pilih nama <strong>Grup Akademi / Wali Murid</strong> Anda &rarr; seluruh isi teks pengumuman sudah otomatis tertempel di kolom pesan, tinggal tekan tombol <strong>Kirim (Send)</strong>!
+                  • <strong>Di HP / Smartphone:</strong> Tombol ini otomatis memunculkan aplikasi WhatsApp Anda untuk langsung memilih grup tujuan.<br />
+                  • <strong>Di Laptop / Komputer:</strong> WhatsApp Web tidak mengizinkan website luar menyuntikkan teks langsung ke dalam grup demi alasan keamanan anti-spam Meta. Oleh karena itu, saat tombol ditekan teks <strong>otomatis disalin ke clipboard</strong> dan WhatsApp Web dibuka &rarr; Anda tinggal klik grup Anda lalu tekan <strong>Paste (Ctrl + V)</strong> dan Kirim.
+                </p>
+              </div>
+
+              {/* Pengaturan Tautan Link Grup WhatsApp Akademi (Opsional) */}
+              <div className="pt-2 border-t border-smart-border/70 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-slate-300 flex items-center gap-1.5">
+                    <ExternalLink className="w-3.5 h-3.5 text-smart-gold-light" />
+                    Tautan Link Undangan Grup WA (Opsional):
+                  </span>
+                </div>
+                <form onSubmit={handleSaveGroupLink} className="flex gap-2">
+                  <input
+                    type="url"
+                    placeholder="Contoh: https://chat.whatsapp.com/AbCdEf..."
+                    value={groupLink}
+                    onChange={(e) => setGroupLink(e.target.value)}
+                    className="flex-1 px-3 py-1.5 bg-smart-dark border border-smart-border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-smart-gold font-mono"
+                  />
+                  <Button
+                    variant="secondary"
+                    size="xs"
+                    type="submit"
+                    isLoading={savingGroupLink}
+                    className="flex-shrink-0"
+                  >
+                    Simpan Link
+                  </Button>
+                </form>
+                <p className="text-[10px] text-slate-500">
+                  Jika link grup diisi, tombol di atas akan langsung mengarahkan Anda membuka grup tersebut.
                 </p>
               </div>
             </CardContent>
