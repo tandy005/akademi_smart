@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense, useMemo, useRef } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useRole } from '@/context/RoleContext';
 import {
@@ -15,6 +16,8 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
+  QrCode,
+  Sparkles,
 } from 'lucide-react';
 import {
   Member,
@@ -253,19 +256,64 @@ function AbsensiContent() {
         subtitle="Ceklis kehadiran atlet bola voli, rekap izin/sakit, dan sinkronisasi statistik kehadiran ke dashboard anggota"
         actions={
           role !== 'MEMBER' && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleSaveAttendance}
-              isLoading={saving}
-              disabled={targetMembers.length === 0}
-              icon={<Save className="w-4 h-4" />}
-            >
-              Simpan Absensi
-            </Button>
+            <div className="flex items-center gap-2">
+              <Link href="/scan">
+                <Button
+                  variant="gold"
+                  size="sm"
+                  icon={<QrCode className="w-4 h-4" />}
+                >
+                  Scanner Lapangan (PIN)
+                </Button>
+              </Link>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSaveAttendance}
+                isLoading={saving}
+                disabled={targetMembers.length === 0}
+                icon={<Save className="w-4 h-4" />}
+              >
+                Simpan Absensi
+              </Button>
+            </div>
           )
         }
       />
+
+      {/* Banner Pintas Mode Scanner Lapangan */}
+      {role !== 'MEMBER' && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-red-950/80 via-red-900/60 to-red-950/80 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-white shadow-md">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 flex items-center justify-center flex-shrink-0">
+              <QrCode className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm text-white">
+                  Scanner Presensi Cepat (Mode 2-in-1)
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                  PIN: 0909
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 mt-0.5">
+                Bisa digunakan langsung di HP pelatih (Mode Handheld) atau disandarkan di meja pintu masuk GOR (Mode Kiosk Mandiri).
+              </p>
+            </div>
+          </div>
+          <Link href="/scan" className="w-full sm:w-auto">
+            <Button
+              variant="gold"
+              size="sm"
+              className="w-full sm:w-auto font-bold"
+              icon={<Sparkles className="w-3.5 h-3.5" />}
+            >
+              Buka Scanner Lapangan
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Success Notification */}
       {saveSuccessMsg && (

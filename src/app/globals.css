@@ -49,4 +49,28 @@ body {
     background: #ffffff !important;
     color: #000000 !important;
   }
+
+  /* KTA Digital & Receipt print adjustments */
+  .printable-kta,
+  .printable-receipt {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body:has(.printable-kta) * {
+    visibility: hidden;
+  }
+
+  body:has(.printable-kta) .printable-kta,
+  body:has(.printable-kta) .printable-kta * {
+    visibility: visible;
+  }
+
+  body:has(.printable-kta) .printable-kta {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: none !important;
+  }
 }

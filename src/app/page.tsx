@@ -17,6 +17,7 @@ import {
   Filter,
   ClipboardCheck,
   CheckCircle2,
+  QrCode,
 } from 'lucide-react';
 import {
   Member,
@@ -25,6 +26,7 @@ import {
   AttendanceRecord,
 } from '@/lib/types';
 import MonthlyFinanceChart from '@/components/MonthlyFinanceChart';
+import KtaModal from '@/components/KtaModal';
 import {
   StatCard,
   Badge,
@@ -62,6 +64,7 @@ export default function DashboardPage() {
 
   const currentYear = new Date().getFullYear();
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
+  const [isKtaModalOpen, setIsKtaModalOpen] = useState<boolean>(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -225,19 +228,63 @@ export default function DashboardPage() {
                 </Link>
               </>
             ) : (
-              <Link href="/keuangan">
+              <>
                 <Button
-                  variant="gold"
+                  variant="secondary"
                   size="sm"
-                  icon={<TrendingUp className="w-4 h-4" />}
+                  onClick={() => setIsKtaModalOpen(true)}
+                  icon={<QrCode className="w-4 h-4 text-smart-gold-light" />}
                 >
-                  Lihat Laporan Keuangan
+                  KTA Digital &amp; QR
                 </Button>
-              </Link>
+                <Link href="/keuangan">
+                  <Button
+                    variant="gold"
+                    size="sm"
+                    icon={<TrendingUp className="w-4 h-4" />}
+                  >
+                    Lihat Laporan Keuangan
+                  </Button>
+                </Link>
+              </>
             )}
           </div>
         </div>
       </div>
+
+      {/* Athlete KTA Card Widget for Member Persona */}
+      {role === 'MEMBER' && currentMember && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-red-950/80 via-red-900/60 to-red-950/80 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-white shadow-md">
+          <div className="flex items-center gap-3.5 w-full sm:w-auto">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 text-amber-300 flex items-center justify-center flex-shrink-0 shadow-inner">
+              <QrCode className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm text-white">
+                  KTA Digital: {currentMember.name}
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                  {currentMember.registrationNumber || currentMember.id}
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 mt-0.5">
+                Tunjukkan QR Code pada KTA kepada pelatih saat tiba di lapangan untuk presensi otomatis 1 detik.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <Button
+              variant="gold"
+              size="sm"
+              onClick={() => setIsKtaModalOpen(true)}
+              icon={<QrCode className="w-4 h-4" />}
+            >
+              Buka KTA Digital
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Member Persona Alert if unpaid this month */}
       {role === 'MEMBER' && currentMember && memberCurrentDue && !memberCurrentDue.isPaid && (
@@ -626,6 +673,13 @@ export default function DashboardPage() {
           onSelectMonth={setSelectedMonth}
         />
       </div>
+
+      {/* Modal KTA Digital Atlet */}
+      <KtaModal
+        isOpen={isKtaModalOpen}
+        onClose={() => setIsKtaModalOpen(false)}
+        member={currentMember}
+      />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import {
   Newspaper,
   MessageSquareText,
   Zap,
+  QrCode,
 } from 'lucide-react';
 import { Badge } from '@/components/ui';
 
@@ -53,6 +54,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       href: '/absensi',
       icon: ClipboardCheck,
       roles: ['ADMIN'],
+    },
+    {
+      label: 'Scanner Lapangan',
+      href: '/scan',
+      icon: QrCode,
+      roles: ['ADMIN'],
+      badge: 'PIN 0909',
+      badgeHighlight: true,
     },
     {
       label: 'Kas Bulanan',

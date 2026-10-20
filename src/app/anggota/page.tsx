@@ -12,6 +12,7 @@ import {
   AlertCircle,
   MapPin,
   Calendar,
+  QrCode,
 } from 'lucide-react';
 import { Member, MemberStatus, Gender, calculateMemberAge } from '@/lib/types';
 import { generateDirectWhatsAppUrl } from '@/lib/whatsapp-utils';
@@ -23,6 +24,7 @@ import {
   FormInput,
   FormSelect,
 } from '@/components/ui';
+import KtaModal from '@/components/KtaModal';
 
 interface MemberFormState {
   name: string;
@@ -55,6 +57,15 @@ export default function AnggotaPage() {
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // KTA Digital Modal State
+  const [isKtaModalOpen, setIsKtaModalOpen] = useState(false);
+  const [selectedKtaMember, setSelectedKtaMember] = useState<Member | null>(null);
+
+  const openKtaModal = (m: Member) => {
+    setSelectedKtaMember(m);
+    setIsKtaModalOpen(true);
+  };
 
   // Form State (Nama, Umur, Jenis Kelamin, Nomor WA, Alamat, Status)
   const [formData, setFormData] = useState<MemberFormState>(initialFormState);
@@ -291,7 +302,7 @@ export default function AnggotaPage() {
                 <th className="py-3.5 px-4">Nomor WA</th>
                 <th className="py-3.5 px-4">Alamat</th>
                 <th className="py-3.5 px-4 w-24">Status</th>
-                {role !== 'MEMBER' && <th className="py-3.5 px-4 text-right w-20">Aksi</th>}
+                <th className="py-3.5 px-4 text-right w-28">KTA / Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-smart-border/60">
@@ -393,27 +404,37 @@ export default function AnggotaPage() {
                       </Badge>
                     </td>
 
-                    {/* Aksi */}
-                    {role !== 'MEMBER' && (
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => openEditModal(m)}
-                            className="p-1.5 text-slate-400 hover:text-smart-gold-light hover:bg-smart-maroon/20 rounded-lg transition cursor-pointer"
-                            title="Edit Data Anggota"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(m.id, m.name)}
-                            className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition cursor-pointer"
-                            title="Hapus Anggota"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    )}
+                    {/* KTA / Aksi */}
+                    <td className="py-3.5 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => openKtaModal(m)}
+                          className="px-2 py-1 text-amber-300 hover:text-white bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/30 rounded-lg transition cursor-pointer flex items-center gap-1 font-semibold text-[11px]"
+                          title="Buka KTA Digital & QR Presensi"
+                        >
+                          <QrCode className="w-3.5 h-3.5 text-amber-400" />
+                          <span>KTA</span>
+                        </button>
+                        {role !== 'MEMBER' && (
+                          <>
+                            <button
+                              onClick={() => openEditModal(m)}
+                              className="p-1.5 text-slate-400 hover:text-smart-gold-light hover:bg-smart-maroon/20 rounded-lg transition cursor-pointer"
+                              title="Edit Data Anggota"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(m.id, m.name)}
+                              className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition cursor-pointer"
+                              title="Hapus Anggota"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -526,6 +547,13 @@ export default function AnggotaPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Modal KTA Digital & QR Presensi */}
+      <KtaModal
+        isOpen={isKtaModalOpen}
+        onClose={() => setIsKtaModalOpen(false)}
+        member={selectedKtaMember}
+      />
     </div>
   );
 }
