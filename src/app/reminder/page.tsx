@@ -5,13 +5,11 @@ import Link from 'next/link';
 import { useRole } from '@/context/RoleContext';
 import {
   MessageSquareText,
-  Send,
   Calendar,
   Users,
   CheckCircle2,
   Copy,
   ExternalLink,
-  Share2,
   Clock,
   Sparkles,
   Search,
@@ -19,10 +17,9 @@ import {
   Phone,
   MessageCircle,
   MapPin,
-  UserCheck,
   Check,
 } from 'lucide-react';
-import { Member, TrainingSchedule, WhatsAppConfig } from '@/lib/types';
+import { Member, TrainingSchedule } from '@/lib/types';
 import {
   PageHeader,
   Card,
@@ -62,14 +59,9 @@ export default function ReminderPage() {
   const [selectedScheduleId, setSelectedScheduleId] = useState<string>('');
   const [academyName, setAcademyName] = useState('Akademi Voly Smart 09');
   const [messageTemplate, setMessageTemplate] = useState<string>('');
-  const [groupLink, setGroupLink] = useState<string>(
-    'https://chat.whatsapp.com/LpqwManvzcd9akuArzDvIw?s=cl&p=a&mlu=4&ilr=4'
-  );
 
   const [loading, setLoading] = useState(true);
   const [savingTemplate, setSavingTemplate] = useState(false);
-  const [savingGroupLink, setSavingGroupLink] = useState(false);
-  const [copiedGroupMessage, setCopiedGroupMessage] = useState(false);
   const [copiedMemberId, setCopiedMemberId] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
@@ -92,7 +84,6 @@ export default function ReminderPage() {
           const schData: TrainingSchedule[] = await schRes.json();
           setSchedules(schData);
           if (schData.length > 0) {
-            // Auto select schedule nearest to today/upcoming
             const todayStr = new Date().toISOString().split('T')[0];
             const upcoming = schData.find((s) => s.date >= todayStr) || schData[0];
             setSelectedScheduleId(upcoming.id);
@@ -108,9 +99,6 @@ export default function ReminderPage() {
           const remData = await remRes.json();
           if (remData.config?.messageTemplate) {
             setMessageTemplate(remData.config.messageTemplate);
-          }
-          if (remData.config?.groupLink) {
-            setGroupLink(remData.config.groupLink);
           }
           if (remData.academyName) {
             setAcademyName(remData.academyName);
@@ -146,117 +134,13 @@ export default function ReminderPage() {
     });
   }, [members, genderFilter, searchQuery]);
 
-  // Generate Group Broadcast Message Text
-  const groupBroadcastText = useMemo(() => {
-    if (!activeSchedule) return '';
-    const dateFormatted = formatDisplayDate(activeSchedule.date);
-
-    return `🏐 *PENGUMUMAN JADWAL LATIHAN BOLA VOLI* 🏐
-*${academyName}*
-
-Halo seluruh atlet dan wali murid, berikut adalah informasi jadwal sesi latihan terdekat:
-
-📅 *Hari/Tanggal:* ${dateFormatted}
-⏰ *Waktu:* ${activeSchedule.startTime} - ${activeSchedule.endTime} WIB *(Hadir 15 menit sebelumnya)*
-📍 *Lokasi:* ${activeSchedule.location}
-👨‍🏫 *Pelatih Bertugas:* Coach ${activeSchedule.coachName}
-🎯 *Fokus Materi:* ${activeSchedule.focusMaterial || 'Latihan Taktik & Fisik Reguler'}
-
-📌 *Catatan Atlet:*
-• Memakai seragam/jersey latihan resmi
-• Membawa sepatu voli, deker/pelindung, dan botol minum pribadi
-• Jangan lupa tunjukkan KTA / QR Code saat tiba di lapangan untuk presensi otomatis 1 detik
-
-Mari hadir tepat waktu dan semangat berlatih bersama! 💪🔥
-
-_- Pengurus ${academyName}_ ✨`;
-  }, [activeSchedule, academyName]);
-
-  // Fungsi pintar membagikan langsung ke Grup WhatsApp
-  const handleShareToGroup = async () => {
-    // 1. Selalu salin teks ke clipboard terlebih dahulu
-    try {
-      await navigator.clipboard.writeText(groupBroadcastText);
-      setCopiedGroupMessage(true);
-      setTimeout(() => setCopiedGroupMessage(false), 4000);
-    } catch {}
-
-    // 2. Di HP/Smartphone (Android & iOS): Gunakan Web Share API resmi
-    // Fitur ini otomatis membuka WhatsApp dan menampilkan pemilih kontak/grup!
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({
-          title: `Pengumuman Latihan ${academyName}`,
-          text: groupBroadcastText,
-        });
-        setSuccessToast('✅ Pesan berhasil dibagikan ke WhatsApp!');
-        setTimeout(() => setSuccessToast(null), 4000);
-        return;
-      } catch (err: unknown) {
-        if ((err as Error)?.name === 'AbortError') {
-          return;
-        }
-      }
-    }
-
-    // 3. Di Laptop/Desktop (WhatsApp Web tidak mengizinkan inject teks otomatis ke grup demi proteksi spam)
-    // Jika ada link grup yang disimpan pengurus, buka link grup tersebut!
-    // Jika tidak, buka web.whatsapp.com
-    const targetUrl = groupLink?.trim() || 'https://web.whatsapp.com';
-    window.open(targetUrl, '_blank');
-
-    setSuccessToast(
-      '📋 Teks pengumuman SUDAH OTOMATIS TERSALIN! Di WhatsApp Web, klik grup latihan Anda lalu tekan Tempel / Paste (Ctrl + V) dan Kirim.'
-    );
-  };
-
-  // Simpan tautan link grup WhatsApp
-  const handleSaveGroupLink = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSavingGroupLink(true);
-    try {
-      const res = await fetch('/api/reminder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'UPDATE_CONFIG',
-          config: {
-            groupLink,
-          },
-        }),
-      });
-
-      if (res.ok) {
-        setSuccessToast('✅ Tautan link grup WhatsApp berhasil disimpan!');
-        setTimeout(() => setSuccessToast(null), 3500);
-      } else {
-        alert('Gagal menyimpan link grup');
-      }
-    } catch {
-      alert('Terjadi kesalahan jaringan');
-    } finally {
-      setSavingGroupLink(false);
-    }
-  };
-
-  // Copy Group Broadcast to Clipboard
-  const handleCopyGroupBroadcast = () => {
-    navigator.clipboard.writeText(groupBroadcastText);
-    setCopiedGroupMessage(true);
-    setSuccessToast('📋 Format Pengumuman Grup WhatsApp berhasil disalin ke clipboard!');
-    setTimeout(() => {
-      setCopiedGroupMessage(false);
-      setSuccessToast(null);
-    }, 4000);
-  };
-
   // Copy individual message
   const handleCopyMemberMessage = (m: Member) => {
     if (!activeSchedule) return;
     const text = renderReminderMessage(messageTemplate, m, activeSchedule, academyName);
     navigator.clipboard.writeText(text);
     setCopiedMemberId(m.id);
-    setSuccessToast(`📋 Pesan personal untuk ${m.name} berhasil disalin!`);
+    setSuccessToast(`📋 Pesan pengingat untuk ${m.name} berhasil disalin!`);
     setTimeout(() => {
       setCopiedMemberId(null);
       setSuccessToast(null);
@@ -296,28 +180,25 @@ _- Pengurus ${academyName}_ ✨`;
     <div className="space-y-6">
       {/* PageHeader */}
       <PageHeader
-        badgeText="Pengingat WhatsApp Langsung"
+        badgeText="Pengingat WhatsApp Atlet"
         badgeIcon={<MessageSquareText className="w-3.5 h-3.5" />}
         title="Pengingat Latihan WhatsApp"
-        subtitle="Kirim pengumuman latihan ke grup WhatsApp dan kirim pesan pengingat personal ke atlet/wali murid dengan 1 klik (100% Gratis & langsung via WhatsApp Anda)."
+        subtitle="Kirim pesan pengingat latihan personal ke masing-masing atlet atau wali murid dengan 1 klik langsung via WhatsApp (100% Gratis & tanpa pihak ketiga)."
         actions={
           <div className="flex items-center gap-2">
-            <Button
-              variant="gold"
-              size="sm"
-              onClick={handleShareToGroup}
-              icon={<MessageCircle className="w-4 h-4" />}
+            <a
+              href="https://web.whatsapp.com"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              Kirim ke Grup WA
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCopyGroupBroadcast}
-              icon={<Copy className="w-4 h-4" />}
-            >
-              {copiedGroupMessage ? 'Tersalin!' : 'Salin Format'}
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<ExternalLink className="w-4 h-4" />}
+              >
+                Buka WhatsApp Web
+              </Button>
+            </a>
           </div>
         }
       />
@@ -347,7 +228,7 @@ _- Pengurus ${academyName}_ ✨`;
               <span>Pilih Sesi Latihan yang Ingin Diingatkan:</span>
             </label>
             <p className="text-[11px] text-slate-400">
-              Format pengumuman grup dan pesan personal ke atlet akan otomatis menyesuaikan tanggal &amp; materi sesi ini.
+              Pesan personal ke masing-masing atlet akan otomatis menyesuaikan tanggal, jam, dan materi sesi ini.
             </p>
           </div>
 
@@ -407,7 +288,7 @@ _- Pengurus ${academyName}_ ✨`;
                 <div>
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Users className="w-4 h-4 text-smart-gold-light" />
-                    <span>Daftar Atlet &amp; Pengingat Personal</span>
+                    <span>Daftar Kontak Atlet &amp; Pengingat Personal</span>
                   </CardTitle>
                   <CardDescription>
                     Klik tombol WhatsApp untuk langsung membuka chat dengan pesan yang sudah terisi otomatis
@@ -551,123 +432,18 @@ _- Pengurus ${academyName}_ ✨`;
         </div>
 
         {/* ================================================================= */}
-        {/* KOLOM KANAN (5 Kolom): FORMAT PESAN GRUP & TEMPLATE PESAN */}
+        {/* KOLOM KANAN (5 Kolom): TEMPLATE PESAN PERSONAL & PANDUAN */}
         {/* ================================================================= */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Format Pesan Siaran Grup WhatsApp */}
-          <Card className="border-amber-500/30">
-            <CardHeader className="bg-amber-950/20 border-b border-amber-500/20">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm flex items-center gap-2 text-white">
-                  <Share2 className="w-4 h-4 text-amber-400" />
-                  <span>Format Pengumuman Grup WA</span>
-                </CardTitle>
-                <Button
-                  variant="gold"
-                  size="xs"
-                  onClick={handleCopyGroupBroadcast}
-                  icon={<Copy className="w-3 h-3" />}
-                >
-                  {copiedGroupMessage ? 'Tersalin!' : 'Salin Teks'}
-                </Button>
-              </div>
-              <CardDescription>
-                Siap disalin dan di-paste langsung ke grup WhatsApp atlet/wali murid
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-3 pt-4">
-              <div className="p-3.5 rounded-xl bg-smart-dark border border-smart-border font-mono text-[11px] text-emerald-300 whitespace-pre-wrap leading-relaxed max-h-72 overflow-y-auto selection:bg-amber-500 selection:text-black">
-                {groupBroadcastText}
-              </div>
-
-              <div className="flex flex-col gap-2 pt-1">
-                <Button
-                  variant="gold"
-                  size="md"
-                  onClick={handleShareToGroup}
-                  className="w-full font-bold text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer"
-                  icon={<MessageCircle className="w-4 h-4" />}
-                >
-                  Buka Grup WhatsApp (Teks Otomatis Tersalin)
-                </Button>
-
-                <a
-                  href={`whatsapp://send?text=${encodeURIComponent(groupBroadcastText)}`}
-                  className="w-full py-2 px-3 rounded-xl bg-smart-dark border border-smart-border hover:border-smart-gold text-slate-300 hover:text-white font-medium text-xs flex items-center justify-center gap-1.5 transition text-center"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Buka di Aplikasi WhatsApp (Teks Otomatis Terisi)</span>
-                </a>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCopyGroupBroadcast}
-                  className="w-full font-semibold"
-                  icon={<Copy className="w-4 h-4" />}
-                >
-                  {copiedGroupMessage ? 'Format Berhasil Disalin!' : 'Salin Format Teks Pengumuman'}
-                </Button>
-              </div>
-
-              {/* Tips Petunjuk Penggunaan */}
-              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 space-y-1.5 animate-in fade-in">
-                <span className="font-bold text-amber-300 flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                  PENTING (Agar Tidak Muncul Error &quot;Pesan Kosong&quot;):
-                </span>
-                <p className="text-[11px] leading-relaxed text-slate-300">
-                  Saat grup WhatsApp terbuka, kolom chat memang sengaja dikosongkan oleh sistem keamanan WhatsApp. 
-                  <strong className="text-white block mt-1">
-                    👉 Cukup klik kolom chat WhatsApp Anda, lalu tekan <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-400/40 font-mono">Ctrl + V</kbd> (atau klik kanan &rarr; Tempel), lalu tekan Kirim!
-                  </strong>
-                  Seluruh isi pesan pengumuman yang rapi akan langsung muncul seketika karena sudah otomatis disalin oleh web.
-                </p>
-              </div>
-
-              {/* Pengaturan Tautan Link Grup WhatsApp Akademi (Opsional) */}
-              <div className="pt-2 border-t border-smart-border/70 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-slate-300 flex items-center gap-1.5">
-                    <ExternalLink className="w-3.5 h-3.5 text-smart-gold-light" />
-                    Tautan Link Undangan Grup WA (Opsional):
-                  </span>
-                </div>
-                <form onSubmit={handleSaveGroupLink} className="flex gap-2">
-                  <input
-                    type="url"
-                    placeholder="Contoh: https://chat.whatsapp.com/AbCdEf..."
-                    value={groupLink}
-                    onChange={(e) => setGroupLink(e.target.value)}
-                    className="flex-1 px-3 py-1.5 bg-smart-dark border border-smart-border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-smart-gold font-mono"
-                  />
-                  <Button
-                    variant="secondary"
-                    size="xs"
-                    type="submit"
-                    isLoading={savingGroupLink}
-                    className="flex-shrink-0"
-                  >
-                    Simpan Link
-                  </Button>
-                </form>
-                <p className="text-[10px] text-slate-500">
-                  Jika link grup diisi, tombol di atas akan langsung mengarahkan Anda membuka grup tersebut.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Kustomisasi Template Pesan Personal */}
           <Card>
             <CardHeader>
               <CardTitle className="text-sm flex items-center gap-2">
                 <Settings className="w-4 h-4 text-smart-gold-light" />
-                <span>Kustomisasi Template Pesan Personal</span>
+                <span>Kustomisasi Template Pesan Pengingat</span>
               </CardTitle>
               <CardDescription>
-                Ubah kata-kata pesan WhatsApp yang dikirimkan secara pribadi ke masing-masing atlet
+                Atur format kalimat pesan WhatsApp personal yang dikirimkan ke atlet / orang tua
               </CardDescription>
             </CardHeader>
 
@@ -675,7 +451,7 @@ _- Pengurus ${academyName}_ ✨`;
               <form onSubmit={handleSaveTemplate} className="space-y-3 text-xs">
                 <div>
                   <textarea
-                    rows={7}
+                    rows={9}
                     value={messageTemplate}
                     onChange={(e) => setMessageTemplate(e.target.value)}
                     className="w-full p-3 bg-smart-dark border border-smart-border rounded-xl text-emerald-300 font-mono text-xs focus:outline-none focus:border-smart-gold leading-relaxed"
@@ -683,7 +459,7 @@ _- Pengurus ${academyName}_ ✨`;
                 </div>
 
                 <div className="p-3 rounded-xl bg-smart-dark border border-smart-border text-[11px] text-slate-400 space-y-1">
-                  <div className="font-semibold text-smart-gold-light">Variabel yang Tersedia:</div>
+                  <div className="font-semibold text-smart-gold-light">Variabel Otomatis:</div>
                   <div className="grid grid-cols-2 gap-1 font-mono text-slate-300 text-[10px]">
                     <span>{'{nama}'} = Nama Atlet</span>
                     <span>{'{kategori}'} = Kategori Usia</span>
@@ -698,7 +474,7 @@ _- Pengurus ${academyName}_ ✨`;
 
                 <div className="pt-1 flex justify-end">
                   <Button
-                    variant="secondary"
+                    variant="primary"
                     size="sm"
                     type="submit"
                     isLoading={savingTemplate}

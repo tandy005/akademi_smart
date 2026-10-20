@@ -125,7 +125,6 @@ export interface WhatsAppConfig {
   apiKey: string;
   senderNumber: string;
   webhookUrl?: string;
-  groupLink?: string; // Tautan Grup WhatsApp Akademi (e.g. https://chat.whatsapp.com/...)
   autoReminderEnabled: boolean;
   reminderHoursBefore: number; // default: 4
   messageTemplate: string;
