@@ -117,7 +117,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }: NavbarProps) 
           </button>
 
           <Link href="/" className="flex items-center group">
-            <AcademyLogo size="md" showText={true} textSubtitle="Sistem Informasi &amp; Reminder Voli" />
+            <AcademyLogo size="md" showText={true}  />
           </Link>
         </div>
 
