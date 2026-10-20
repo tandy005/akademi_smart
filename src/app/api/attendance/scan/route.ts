@@ -9,6 +9,29 @@ const DEFAULT_FIELD_PIN = process.env.FIELD_SCANNER_PIN || '0909';
 function parseQrPayload(payload: string): { memberId?: string; nis?: string } {
   const trimmed = payload.trim();
   
+  // Format URL Web (untuk Google Lens / Kamera HP biasa)
+  // Contoh: http://domain.com/absen?id=m-1&nis=SMART-2026-001
+  if (trimmed.includes('/absen?') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    try {
+      const url = new URL(trimmed);
+      const memberId = url.searchParams.get('id') || undefined;
+      const nis = url.searchParams.get('nis') || undefined;
+      if (memberId || nis) {
+        return { memberId, nis };
+      }
+    } catch {
+      // Jika URL parsing gagal, coba regex sederhana
+      const idMatch = trimmed.match(/[?&]id=([^&#]+)/);
+      const nisMatch = trimmed.match(/[?&]nis=([^&#]+)/);
+      if (idMatch || nisMatch) {
+        return {
+          memberId: idMatch ? decodeURIComponent(idMatch[1]) : undefined,
+          nis: nisMatch ? decodeURIComponent(nisMatch[1]) : undefined,
+        };
+      }
+    }
+  }
+
   // Format standard: SMART_VOLLEY:ID:<memberId>:NIS:<nis>
   if (trimmed.startsWith('SMART_VOLLEY:')) {
     const parts = trimmed.split(':');

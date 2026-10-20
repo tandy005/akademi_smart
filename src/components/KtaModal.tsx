@@ -33,11 +33,19 @@ export default function KtaModal({
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [copiedNis, setCopiedNis] = useState(false);
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
+  const [origin, setOrigin] = useState<string>('http://localhost:3002');
   const cardRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.origin) {
+      setOrigin(window.location.origin);
+    }
+  }, []);
+
   const regNo = member?.registrationNumber || `SMART-2026-${member?.id?.replace('m-', '') || '001'}`;
+  // Dual Function: Format URL web agar langsung dikenali oleh Google Lens & Kamera HP biasa!
   const qrPayload = member
-    ? `SMART_VOLLEY:ID:${member.id}:NIS:${regNo}`
+    ? `${origin}/absen?id=${member.id}&nis=${encodeURIComponent(regNo)}`
     : '';
 
   useEffect(() => {

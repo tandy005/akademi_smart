@@ -307,50 +307,7 @@
       "notes": "Anggota Baru"
     }
   ],
-  "schedules": [
-    {
-      "id": "sch-selasa",
-      "day": "Selasa",
-      "title": "Latihan Rutin Hari Selasa",
-      "category": "Semua Kategori",
-      "date": "2026-10-13",
-      "startTime": "20:00",
-      "endTime": "22:00",
-      "location": "Lapangan Smart 09 Taman Pondok Legi",
-      "coachName": "Pelatih Smart 09",
-      "focusMaterial": "Latihan Rutin",
-      "reminderSent": false,
-      "reminderHoursBefore": 4
-    },
-    {
-      "id": "sch-kamis",
-      "day": "Kamis",
-      "title": "Latihan Rutin Hari Kamis",
-      "category": "Semua Kategori",
-      "date": "2026-10-15",
-      "startTime": "20:00",
-      "endTime": "22:00",
-      "location": "Lapangan Smart 09 Taman Pondok Legi",
-      "coachName": "Pelatih Smart 09",
-      "focusMaterial": "Latihan Rutin",
-      "reminderSent": false,
-      "reminderHoursBefore": 4
-    },
-    {
-      "id": "sch-sabtu",
-      "day": "Sabtu",
-      "title": "Latihan Rutin Hari Sabtu",
-      "category": "Semua Kategori",
-      "date": "2026-10-17",
-      "startTime": "15:30",
-      "endTime": "20:00",
-      "location": "Lapangan Smart 09 Taman Pondok Legi",
-      "coachName": "Pelatih Smart 09",
-      "focusMaterial": "Latihan Rutin",
-      "reminderSent": false,
-      "reminderHoursBefore": 4
-    }
-  ],
+  "schedules": [],
   "attendances": [],
   "dues": [
     {
