@@ -1044,17 +1044,6 @@
   ],
   "transactions": [
     {
-      "id": "tx-due-due-m-2-2026-12",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 12/2026 - Syafiq",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-2-2026-12",
-      "receiptNumber": "KWT-202612-m-2-274",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
       "id": "tx-due-due-m-16-2026-11",
       "type": "INCOME",
       "category": "Iuran Kas",
@@ -1121,17 +1110,6 @@
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-10-2026-11",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 11/2026 - Zahra",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-10-2026-11",
-      "receiptNumber": "KWT-202611-m-10-754",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
       "id": "tx-due-due-m-6-2026-12",
       "type": "INCOME",
       "category": "Iuran Kas",
@@ -1151,6 +1129,17 @@
       "date": "2026-10-19",
       "relatedDueId": "due-m-5-2026-10",
       "receiptNumber": "KWT-202610-m-5-909",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-2-2026-12",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 12/2026 - Syafiq",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-2-2026-12",
+      "receiptNumber": "KWT-202612-m-2-274",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1195,6 +1184,17 @@
       "date": "2026-10-19",
       "relatedDueId": "due-m-2-2027-1",
       "receiptNumber": "KWT-202701-m-2-984",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-2-2027-2",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 2/2027 (Dibayar di Awal) - Syafiq",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-2-2027-2",
+      "receiptNumber": "KWT-202702-m-2-735",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1264,17 +1264,6 @@
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-2-2027-2",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 2/2027 (Dibayar di Awal) - Syafiq",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-2-2027-2",
-      "receiptNumber": "KWT-202702-m-2-735",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
       "id": "tx-due-due-m-2-2027-3",
       "type": "INCOME",
       "category": "Iuran Kas",
@@ -1319,17 +1308,6 @@
       "recordedBy": "Bendahara Kas"
     },
     {
-      "id": "tx-due-due-m-16-2026-10",
-      "type": "INCOME",
-      "category": "Iuran Kas",
-      "amount": 10000,
-      "description": "Iuran Kas Bulan 10/2026 - Bu Eko",
-      "date": "2026-10-19",
-      "relatedDueId": "due-m-16-2026-10",
-      "receiptNumber": "KWT-202610-m-16-494",
-      "recordedBy": "Bendahara Kas"
-    },
-    {
       "id": "tx-due-due-m-4-2026-12",
       "type": "INCOME",
       "category": "Iuran Kas",
@@ -1338,6 +1316,17 @@
       "date": "2026-10-19",
       "relatedDueId": "due-m-4-2026-12",
       "receiptNumber": "KWT-202612-m-4-560",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
+      "id": "tx-due-due-m-16-2026-10",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 10/2026 - Bu Eko",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-16-2026-10",
+      "receiptNumber": "KWT-202610-m-16-494",
       "recordedBy": "Bendahara Kas"
     },
     {
@@ -1484,6 +1473,17 @@
       "recordedBy": "Bendahara Kas"
     },
     {
+      "id": "tx-due-due-m-10-2026-11",
+      "type": "INCOME",
+      "category": "Iuran Kas",
+      "amount": 10000,
+      "description": "Iuran Kas Bulan 11/2026 - Zahra",
+      "date": "2026-10-19",
+      "relatedDueId": "due-m-10-2026-11",
+      "receiptNumber": "KWT-202611-m-10-754",
+      "recordedBy": "Bendahara Kas"
+    },
+    {
       "id": "tx-exp-2026-10-18-1",
       "type": "EXPENSE",
       "category": "Konsumsi",
@@ -1551,13 +1551,13 @@
       "recordedBy": "Bendahara Smart 09"
     },
     {
-      "id": "tx-202608-06",
-      "type": "INCOME",
-      "category": "Sponsorship",
-      "amount": 60000,
-      "description": "Sumbangan Donatur (Penutup Kekurangan Pengadaan Kaos & Bola)",
+      "id": "tx-202608-04",
+      "type": "EXPENSE",
+      "category": "Peralatan/Bola",
+      "amount": 620000,
+      "description": "Membeli Bola Voli Mikasa 2200 Super Gold",
       "date": "2026-08-20",
-      "receiptNumber": "KAS-IN-20260820-DONATUR",
+      "receiptNumber": "KAS-OUT-20260820-1",
       "recordedBy": "Pengurus Smart 09"
     },
     {
@@ -1571,23 +1571,13 @@
       "recordedBy": "Pengurus Smart 09"
     },
     {
-      "id": "tx-202608-04",
-      "type": "EXPENSE",
-      "category": "Peralatan/Bola",
-      "amount": 620000,
-      "description": "Membeli Bola Voli Mikasa 2200 Super Gold",
+      "id": "tx-202608-06",
+      "type": "INCOME",
+      "category": "Sponsorship",
+      "amount": 60000,
+      "description": "Sumbangan Donatur (Penutup Kekurangan Pengadaan Kaos & Bola)",
       "date": "2026-08-20",
-      "receiptNumber": "KAS-OUT-20260820-1",
-      "recordedBy": "Pengurus Smart 09"
-    },
-    {
-      "id": "tx-202608-02",
-      "type": "EXPENSE",
-      "category": "Peralatan/Kaos",
-      "amount": 2205000,
-      "description": "Pembelian 20 Kaos Seragam Akademi Voli Smart",
-      "date": "2026-08-06",
-      "receiptNumber": "KAS-OUT-20260806-1",
+      "receiptNumber": "KAS-IN-20260820-DONATUR",
       "recordedBy": "Pengurus Smart 09"
     },
     {
@@ -1598,6 +1588,16 @@
       "description": "Ongkir Pembelian 20 Kaos Seragam",
       "date": "2026-08-06",
       "receiptNumber": "KAS-OUT-20260806-2",
+      "recordedBy": "Pengurus Smart 09"
+    },
+    {
+      "id": "tx-202608-02",
+      "type": "EXPENSE",
+      "category": "Peralatan/Kaos",
+      "amount": 2205000,
+      "description": "Pembelian 20 Kaos Seragam Akademi Voli Smart",
+      "date": "2026-08-06",
+      "receiptNumber": "KAS-OUT-20260806-1",
       "recordedBy": "Pengurus Smart 09"
     },
     {

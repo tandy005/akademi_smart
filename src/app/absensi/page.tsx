@@ -18,6 +18,7 @@ import {
   ChevronRight,
   QrCode,
   Sparkles,
+  FileSpreadsheet,
 } from 'lucide-react';
 import {
   Member,
@@ -207,6 +208,7 @@ function AbsensiContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           scheduleId: selectedDate,
+          replaceSession: true,
           records,
         }),
       });
@@ -257,13 +259,22 @@ function AbsensiContent() {
         actions={
           role !== 'MEMBER' && (
             <div className="flex items-center gap-2">
+              <Link href={`/absensi/rekap?date=${selectedDate}`}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon={<FileSpreadsheet className="w-4 h-4" />}
+                >
+                  Rekapan Absensi
+                </Button>
+              </Link>
               <Link href="/scan">
                 <Button
                   variant="gold"
                   size="sm"
                   icon={<QrCode className="w-4 h-4" />}
                 >
-                  Scanner Lapangan (PIN)
+                  Scanner Lapangan
                 </Button>
               </Link>
               <Button
@@ -280,6 +291,21 @@ function AbsensiContent() {
           )
         }
       />
+
+      {/* Nav Tabs: Ceklis Harian vs Rekapitulasi */}
+      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-smart-dark border border-smart-border w-fit">
+        <span className="px-4 py-2 rounded-xl bg-smart-gold text-smart-dark font-black text-xs shadow-md flex items-center gap-1.5">
+          <ClipboardCheck className="w-4 h-4" />
+          Form Ceklis Harian
+        </span>
+        <Link
+          href={`/absensi/rekap?date=${selectedDate}`}
+          className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-smart-card font-bold text-xs flex items-center gap-1.5 transition"
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          Rekapan Absensi &amp; Cek Hadir Scan
+        </Link>
+      </div>
 
       {/* Banner Pintas Mode Scanner Lapangan */}
       {role !== 'MEMBER' && (

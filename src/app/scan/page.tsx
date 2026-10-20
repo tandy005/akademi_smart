@@ -840,6 +840,17 @@ export default function ScanPage() {
                 </div>
               )}
             </div>
+
+            {/* Link Rekapan Lengkap */}
+            <div className="p-3 bg-slate-950/80 border-t border-slate-800 text-center">
+              <Link
+                href="/absensi/rekap?tab=daily"
+                className="text-xs font-bold text-amber-400 hover:text-amber-300 transition inline-flex items-center gap-1.5"
+              >
+                <span>Lihat Rekap Seluruh Atlet &amp; Belum Hadir</span>
+                <span aria-hidden="true">&rarr;</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

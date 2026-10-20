@@ -15,6 +15,7 @@ import {
   MessageSquareText,
   Zap,
   QrCode,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { Badge } from '@/components/ui';
 
@@ -54,6 +55,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       href: '/absensi',
       icon: ClipboardCheck,
       roles: ['ADMIN'],
+    },
+    {
+      label: 'Rekap Absensi',
+      href: '/absensi/rekap',
+      icon: FileSpreadsheet,
+      roles: ['ADMIN', 'MEMBER'],
+      badge: 'Cek Hadir',
     },
     {
       label: 'Scanner Lapangan',

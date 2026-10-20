@@ -14,6 +14,8 @@ import {
   AlertCircle,
   Home,
   RotateCcw,
+  Users,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { Button } from '@/components/ui';
 
@@ -280,12 +282,22 @@ function AbsenContent() {
             </div>
 
             {/* Tombol Aksi */}
-            <div className="pt-2 space-y-2">
-              <Link href="/scan" className="block">
+            <div className="pt-2 space-y-2.5">
+              <Link href="/absensi/rekap?tab=daily" className="block">
                 <Button
                   variant="gold"
                   size="md"
-                  className="w-full font-bold shadow-md"
+                  className="w-full font-black shadow-lg flex items-center justify-center gap-2"
+                  icon={<Users className="w-4 h-4" />}
+                >
+                  Lihat Siapa Saja yang Sudah Absen Hari Ini
+                </Button>
+              </Link>
+              <Link href="/scan" className="block">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="w-full font-bold"
                   icon={<QrCode className="w-4 h-4" />}
                 >
                   Buka Scanner Lapangan Berkelanjutan
@@ -294,9 +306,9 @@ function AbsenContent() {
               <Link href="/" className="block">
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="xs"
                   className="w-full text-slate-400 hover:text-white"
-                  icon={<Home className="w-4 h-4" />}
+                  icon={<Home className="w-3.5 h-3.5" />}
                 >
                   Kembali ke Dashboard Utama
                 </Button>
