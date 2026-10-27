@@ -106,7 +106,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Sidebar Content */}
       <aside
-        className={`fixed top-16 bottom-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-16 bottom-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transition-transform duration-200 ease-in-out lg:translate-x-0 print:hidden ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } flex flex-col justify-between shadow-xs`}
       >

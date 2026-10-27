@@ -7,6 +7,7 @@ import {
   X,
   Printer,
   Download,
+  FileText,
   Send,
   ShieldCheck,
   Sparkles,
@@ -33,6 +34,7 @@ export default function KtaModal({
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [copiedNis, setCopiedNis] = useState(false);
   const [isGeneratingPng, setIsGeneratingPng] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   // Default ke domain server production agar hasil cetak & download KTA selalu valid di Google Lens
   const [origin, setOrigin] = useState<string>(
     process.env.NEXT_PUBLIC_APP_URL || 'https://akademi-smart.vercel.app'
@@ -87,182 +89,191 @@ export default function KtaModal({
     window.print();
   };
 
+  // Render KTA canvas resolusi tinggi (600 x 950 px)
+  const createKtaCanvas = async (): Promise<HTMLCanvasElement | null> => {
+    if (!member) return null;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    // Rasio ID Card Resolusi Tinggi: 600 x 950 px
+    canvas.width = 600;
+    canvas.height = 950;
+
+    // 1. Background Gradient Card
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, 950);
+    bgGradient.addColorStop(0, '#5a0000');
+    bgGradient.addColorStop(0.18, '#8F0000');
+    bgGradient.addColorStop(0.45, '#1e0505');
+    bgGradient.addColorStop(1, '#0f0202');
+    ctx.fillStyle = bgGradient;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, 600, 950, 32);
+    ctx.fill();
+
+    // Border Emas Elegan
+    ctx.strokeStyle = '#D99016';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.roundRect(8, 8, 584, 934, 26);
+    ctx.stroke();
+
+    // Aksesoris Garis Emas Halus Atas
+    ctx.strokeStyle = 'rgba(255, 200, 61, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(30, 140);
+    ctx.lineTo(570, 140);
+    ctx.stroke();
+
+    // 2. Header Brand
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#FFC83D';
+    ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.letterSpacing = '3px';
+    ctx.fillText('OFFICIAL ATHLETE PASS • KTA DIGITAL', 300, 48);
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '900 28px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.letterSpacing = '1px';
+    ctx.fillText('AKADEMI VOLY SMART 09', 300, 85);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.letterSpacing = '0.5px';
+    ctx.fillText('Sistem Pembinaan Atlet Bola Voli Berprestasi', 300, 115);
+
+    // 3. Avatar Badge Lingkaran
+    const avatarY = 225;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(300, avatarY, 60, 0, Math.PI * 2);
+    ctx.fillStyle = '#3a0000';
+    ctx.fill();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#FFC83D';
+    ctx.stroke();
+
+    // Inisial Nama Atlet
+    ctx.fillStyle = '#FFC83D';
+    ctx.font = 'bold 50px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(member.name.charAt(0).toUpperCase(), 300, avatarY);
+    ctx.restore();
+
+    // Jersey Number Badge jika ada
+    if (member.jerseyNumber) {
+      ctx.fillStyle = '#D99016';
+      ctx.beginPath();
+      ctx.arc(350, 265, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`#${member.jerseyNumber}`, 350, 265);
+    }
+
+    // 4. Nama Atlet & NIS
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '900 30px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.fillText(member.name.toUpperCase(), 300, 335);
+
+    // Pill No Registrasi NIS
+    ctx.fillStyle = 'rgba(217, 144, 22, 0.2)';
+    ctx.strokeStyle = '#D99016';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(175, 355, 250, 36, 18);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#FFC83D';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText(`NIS: ${regNo}`, 300, 379);
+
+    // 5. Grid Info Spesifikasi (Posisi, Kategori, Gender, Umur)
+    const infoBoxY = 415;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(40, infoBoxY, 520, 80, 16);
+    ctx.fill();
+    ctx.stroke();
+
+    // Garis pemisah tengah
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.beginPath();
+    ctx.moveTo(300, infoBoxY + 10);
+    ctx.lineTo(300, infoBoxY + 70);
+    ctx.stroke();
+
+    // Kolom Kiri: Posisi & Kategori
+    ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.fillText('POSISI SPESIALISASI', 60, infoBoxY + 30);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.fillText(member.position || 'All-Round', 60, infoBoxY + 58);
+
+    // Kolom Kanan: Kategori & Status
+    ctx.fillText('KELOMPOK UMUR / GENDER', 320, infoBoxY + 30);
+    ctx.fillStyle = '#FFC83D';
+    ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, sans-serif';
+    const catText = `${member.category || 'U-15'} • ${member.gender || 'Putra'} ${age > 0 ? `(${age} Th)` : ''}`;
+    ctx.fillText(catText, 320, infoBoxY + 58);
+
+    // 6. QR Code Section
+    const qrBoxY = 525;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.roundRect(175, qrBoxY, 250, 275, 20);
+    ctx.fill();
+
+    // Gambar QR Code dari dataUrl
+    if (qrDataUrl) {
+      const qrImg = new window.Image();
+      qrImg.src = qrDataUrl;
+      await new Promise((resolve) => {
+        qrImg.onload = resolve;
+      });
+      ctx.drawImage(qrImg, 195, qrBoxY + 15, 210, 210);
+    }
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#334155';
+    ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.fillText('SCAN UNTUK ABSENSI', 300, qrBoxY + 248);
+
+    // 7. Footer Card
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#FFC83D';
+    ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.fillText('✓ TERVERIFIKASI AKTIF • AKADEMI SMART 09', 300, 845);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.fillText('Harap bawa dan tunjukkan kartu ini pada setiap sesi latihan', 300, 875);
+    ctx.fillText('Sidoarjo, Jawa Timur • Indonesia', 300, 898);
+
+    return canvas;
+  };
+
   // Unduh KTA sebagai gambar PNG resolusi tinggi menggunakan Canvas
   const handleDownloadPng = async () => {
     setIsGeneratingPng(true);
     try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      // Rasio ID Card Resolusi Tinggi: 600 x 950 px
-      canvas.width = 600;
-      canvas.height = 950;
-
-      // 1. Background Gradient Card
-      const bgGradient = ctx.createLinearGradient(0, 0, 0, 950);
-      bgGradient.addColorStop(0, '#5a0000');
-      bgGradient.addColorStop(0.18, '#8F0000');
-      bgGradient.addColorStop(0.45, '#1e0505');
-      bgGradient.addColorStop(1, '#0f0202');
-      ctx.fillStyle = bgGradient;
-      ctx.beginPath();
-      ctx.roundRect(0, 0, 600, 950, 32);
-      ctx.fill();
-
-      // Border Emas Elegan
-      ctx.strokeStyle = '#D99016';
-      ctx.lineWidth = 6;
-      ctx.beginPath();
-      ctx.roundRect(8, 8, 584, 934, 26);
-      ctx.stroke();
-
-      // Aksesoris Garis Emas Halus Atas
-      ctx.strokeStyle = 'rgba(255, 200, 61, 0.4)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(30, 140);
-      ctx.lineTo(570, 140);
-      ctx.stroke();
-
-      // 2. Header Brand
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#FFC83D';
-      ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.letterSpacing = '3px';
-      ctx.fillText('OFFICIAL ATHLETE PASS • KTA DIGITAL', 300, 48);
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '900 28px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.letterSpacing = '1px';
-      ctx.fillText('AKADEMI VOLY SMART 09', 300, 85);
-
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-      ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.letterSpacing = '0.5px';
-      ctx.fillText('Sistem Pembinaan Atlet Bola Voli Berprestasi', 300, 115);
-
-      // 3. Avatar Badge Lingkaran
-      const avatarY = 225;
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(300, avatarY, 60, 0, Math.PI * 2);
-      ctx.fillStyle = '#3a0000';
-      ctx.fill();
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = '#FFC83D';
-      ctx.stroke();
-
-      // Inisial Nama Atlet
-      ctx.fillStyle = '#FFC83D';
-      ctx.font = 'bold 50px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(member.name.charAt(0).toUpperCase(), 300, avatarY);
-      ctx.restore();
-
-      // Jersey Number Badge jika ada
-      if (member.jerseyNumber) {
-        ctx.fillStyle = '#D99016';
-        ctx.beginPath();
-        ctx.arc(350, 265, 22, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(`#${member.jerseyNumber}`, 350, 265);
-      }
-
-      // 4. Nama Atlet & NIS
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '900 30px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText(member.name.toUpperCase(), 300, 335);
-
-      // Pill No Registrasi NIS
-      ctx.fillStyle = 'rgba(217, 144, 22, 0.2)';
-      ctx.strokeStyle = '#D99016';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.roundRect(175, 355, 250, 36, 18);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#FFC83D';
-      ctx.font = 'bold 16px monospace';
-      ctx.fillText(`NIS: ${regNo}`, 300, 379);
-
-      // 5. Grid Info Spesifikasi (Posisi, Kategori, Gender, Umur)
-      const infoBoxY = 415;
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(40, infoBoxY, 520, 80, 16);
-      ctx.fill();
-      ctx.stroke();
-
-      // Garis pemisah tengah
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.beginPath();
-      ctx.moveTo(300, infoBoxY + 10);
-      ctx.lineTo(300, infoBoxY + 70);
-      ctx.stroke();
-
-      // Kolom Kiri: Posisi & Kategori
-      ctx.textAlign = 'left';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText('POSISI SPESIALISASI', 60, infoBoxY + 30);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText(member.position || 'All-Round', 60, infoBoxY + 58);
-
-      // Kolom Kanan: Kategori & Status
-      ctx.fillText('KELOMPOK UMUR / GENDER', 320, infoBoxY + 30);
-      ctx.fillStyle = '#FFC83D';
-      ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, sans-serif';
-      const catText = `${member.category || 'U-15'} • ${member.gender || 'Putra'} ${age > 0 ? `(${age} Th)` : ''}`;
-      ctx.fillText(catText, 320, infoBoxY + 58);
-
-      // 6. QR Code Section
-      const qrBoxY = 525;
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.roundRect(175, qrBoxY, 250, 275, 20);
-      ctx.fill();
-
-      // Gambar QR Code dari dataUrl
-      if (qrDataUrl) {
-        const qrImg = new window.Image();
-        qrImg.src = qrDataUrl;
-        await new Promise((resolve) => {
-          qrImg.onload = resolve;
-        });
-        ctx.drawImage(qrImg, 195, qrBoxY + 15, 210, 210);
-      }
-
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#334155';
-      ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText('SCAN UNTUK ABSENSI', 300, qrBoxY + 248);
-
-      // 7. Footer Card
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#FFC83D';
-      ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText('✓ TERVERIFIKASI AKTIF • AKADEMI SMART 09', 300, 845);
-
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText('Harap bawa dan tunjukkan kartu ini pada setiap sesi latihan', 300, 875);
-      ctx.fillText('Sidoarjo, Jawa Timur • Indonesia', 300, 898);
+      const canvas = await createKtaCanvas();
+      if (!canvas || !member) return;
 
       // Download triggered
       const link = document.createElement('a');
@@ -274,6 +285,40 @@ export default function KtaModal({
       alert('Terjadi kesalahan saat mengunduh gambar KTA.');
     } finally {
       setIsGeneratingPng(false);
+    }
+  };
+
+  // Cetak & Unduh KTA sebagai dokumen PDF resmi
+  const handleDownloadPdf = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      const canvas = await createKtaCanvas();
+      if (!canvas || !member) return;
+
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      const { jsPDF } = await import('jspdf');
+
+      // Gunakan format A6 (105 x 148 mm) untuk ID Card resmi
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a6',
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const cardWidth = 86; // lebar kartu di kertas (mm)
+      const cardHeight = (canvas.height / canvas.width) * cardWidth; // 86 * (950/600) = ~136mm
+      const posX = (pageWidth - cardWidth) / 2;
+      const posY = (pageHeight - cardHeight) / 2;
+
+      pdf.addImage(imgData, 'PNG', posX, posY, cardWidth, cardHeight, undefined, 'FAST');
+      pdf.save(`KTA_${member.name.replace(/\s+/g, '_')}_${regNo}.pdf`);
+    } catch (err) {
+      console.error('Gagal membuat PDF KTA:', err);
+      alert('Terjadi kesalahan saat mencetak/mengunduh PDF KTA.');
+    } finally {
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -303,9 +348,9 @@ _Akademi Bola Voli Smart 09 Sidoarjo_ ✨`;
   const waUrl = member.phone ? generateDirectWhatsAppUrl(member.phone, waReceiptText) : '#';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-xs overflow-y-auto print:p-0 print:bg-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-xs overflow-y-auto print:fixed print:inset-0 print:z-[99999] print:bg-white print:p-0 print:m-0 print:flex print:items-center print:justify-center print:overflow-visible">
       {/* Container Modal */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl shadow-black/90 animate-in fade-in zoom-in-95 duration-150 print:border-none print:shadow-none print:max-w-none print:w-auto">
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl shadow-black/90 animate-in fade-in zoom-in-95 duration-150 print:bg-transparent print:border-none print:shadow-none print:max-w-none print:w-auto print:m-0 print:p-0">
         {/* Header Actions (Disembunyikan saat dicetak) */}
         <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-950/70 print:hidden">
           <div className="flex items-center gap-2 text-white font-bold text-sm">
@@ -313,15 +358,16 @@ _Akademi Bola Voli Smart 09 Sidoarjo_ ✨`;
             <span>KTA Digital Atlet</span>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap justify-end">
             <Button
-              variant="secondary"
+              variant="primary"
               size="xs"
-              onClick={handlePrint}
-              icon={<Printer className="w-3.5 h-3.5" />}
-              title="Cetak KTA"
+              onClick={handleDownloadPdf}
+              isLoading={isGeneratingPdf}
+              icon={<FileText className="w-3.5 h-3.5" />}
+              title="Cetak & Unduh KTA sebagai file PDF resmi"
             >
-              Cetak
+              Cetak PDF
             </Button>
             <Button
               variant="secondary"
@@ -332,6 +378,15 @@ _Akademi Bola Voli Smart 09 Sidoarjo_ ✨`;
               title="Simpan Gambar KTA ke Galeri"
             >
               Unduh PNG
+            </Button>
+            <Button
+              variant="secondary"
+              size="xs"
+              onClick={handlePrint}
+              icon={<Printer className="w-3.5 h-3.5" />}
+              title="Cetak via Printer Browser"
+            >
+              Print
             </Button>
             {member.phone && (
               <a
@@ -355,7 +410,7 @@ _Akademi Bola Voli Smart 09 Sidoarjo_ ✨`;
         </div>
 
         {/* Modal Body / Kartu KTA Digital */}
-        <div className="p-4 sm:p-6 flex flex-col items-center justify-center bg-slate-950/50 print:p-0">
+        <div className="p-4 sm:p-6 flex flex-col items-center justify-center bg-slate-950/50 print:bg-transparent print:p-0">
           {/* KARTU KTA (Bisa dicetak / di-print) */}
           <div
             ref={cardRef}

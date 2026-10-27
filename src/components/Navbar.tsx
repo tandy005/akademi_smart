@@ -71,7 +71,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }: NavbarProps) 
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200 text-slate-800 shadow-xs">
+    <header className="sticky top-0 z-40 bg-white border-b border-slate-200 text-slate-800 shadow-xs print:hidden">
       {/* 4-Hour Reminder Alert Banner with Smart Red & Gold Gradients */}
       {upcomingSchedule && !isAlertDismissed && (
         <div className="bg-gradient-to-r from-smart-maroon via-smart-red to-smart-maroon px-4 py-2 text-xs sm:text-sm font-medium flex items-center justify-between text-white shadow-inner border-b border-smart-gold/30">

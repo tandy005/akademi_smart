@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { MonthlyDue, Member } from '@/lib/types';
-import { X, Printer, Send, CheckCircle2 } from 'lucide-react';
+import { X, Printer, Send, CheckCircle2, FileText } from 'lucide-react';
 import { generateDirectWhatsAppUrl } from '@/lib/whatsapp-utils';
 import { Button } from '@/components/ui';
 
@@ -38,6 +38,8 @@ export default function ReceiptModal({
   member,
   academyName = 'Akademi Smart',
 }: ReceiptModalProps) {
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
   if (!isOpen || !due || !member) return null;
 
   const handlePrint = () => {
@@ -56,22 +58,147 @@ export default function ReceiptModal({
         year: 'numeric',
       });
 
+  const handleDownloadPdf = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      const { jsPDF } = await import('jspdf');
+      // Format A5 Portrait (148 x 210 mm)
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a5',
+      });
+
+      // Header Banner Maroon
+      doc.setFillColor(143, 0, 0);
+      doc.rect(0, 0, 148, 18, 'F');
+
+      doc.setTextColor(255, 200, 61); // Gold
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text(academyName.toUpperCase(), 10, 12);
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('KUITANSI PEMBAYARAN KAS', 148 - 10, 12, { align: 'right' });
+
+      // Receipt info
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(9);
+      doc.text(`No: ${due.receiptNumber || 'KWT-SMART-2026'}`, 10, 26);
+      doc.text(`Status: LUNAS`, 148 - 10, 26, { align: 'right' });
+
+      // Garis pembatas
+      doc.setDrawColor(203, 213, 225);
+      doc.line(10, 29, 138, 29);
+
+      // Info Pihak
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Diterima Dari:', 10, 36);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${member.name} (${member.registrationNumber})`, 10, 42);
+      doc.text(`Kategori: ${member.category} | Posisi: ${member.position}`, 10, 48);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('Rincian Pembayaran:', 85, 36);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Tanggal: ${receiptDate}`, 85, 42);
+      doc.text(`Metode: ${due.paymentMethod || 'Tunai'}`, 85, 48);
+
+      // Box Pembayaran
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(10, 55, 128, 30, 3, 3, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(10, 55, 128, 30, 3, 3, 'S');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text(`Iuran Kas Bulan ${MONTH_NAMES[due.month]} ${due.year}`, 16, 66);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Iuran operasional lapangan & pembinaan bola voli', 16, 73);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(143, 0, 0);
+      doc.text(`Rp ${due.amount.toLocaleString('id-ID')}`, 132, 70, { align: 'right' });
+
+      // Total Box
+      doc.setFillColor(254, 242, 242);
+      doc.roundedRect(10, 90, 128, 14, 2, 2, 'F');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 41, 59);
+      doc.text('TOTAL DIBAYAR:', 16, 99);
+      doc.setFontSize(12);
+      doc.setTextColor(143, 0, 0);
+      doc.text(`Rp ${due.amount.toLocaleString('id-ID')}`, 132, 100, { align: 'right' });
+
+      // Catatan
+      doc.setFontSize(8);
+      doc.setTextColor(100, 116, 139);
+      doc.setFont('helvetica', 'italic');
+      doc.text(`Catatan: ${due.note || 'Lunas tepat waktu'}`, 10, 112);
+
+      // Tanda Tangan
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(9);
+
+      doc.text('Bendahara / Pengurus,', 15, 130);
+      doc.line(15, 155, 55, 155);
+      doc.setFont('helvetica', 'bold');
+      doc.text('( Bendahara Smart )', 15, 160);
+
+      doc.setFont('helvetica', 'normal');
+      doc.text('Atlet / Wali Murid,', 95, 130);
+      doc.line(95, 155, 135, 155);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`( ${member.name} )`, 95, 160);
+
+      // Footer
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Akademi Voly Smart 09 Sidoarjo • Kuitansi Sah Sistem Digital', 74, 180, { align: 'center' });
+
+      doc.save(`Kuitansi_${member.name.replace(/\s+/g, '_')}_${MONTH_NAMES[due.month]}_${due.year}.pdf`);
+    } catch (err) {
+      console.error('Gagal membuat PDF kuitansi:', err);
+      alert('Terjadi kesalahan saat mengunduh PDF kuitansi.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
   const waReceiptText = `🏐 *KUITANSI RESMI PEMBAYARAN KAS* 🏐\n*${academyName.toUpperCase()}*\n\nNo. Kuitansi: *${due.receiptNumber || 'KWT-SMART-LUNAS'}*\nNama Atlet: *${member.name}* (${member.registrationNumber})\nKategori: *${member.category}* | Posisi: *${member.position}*\n\n✅ Pembayaran: Iuran Kas Bulan *${MONTH_NAMES[due.month]} ${due.year}*\n💵 Jumlah: *Rp ${due.amount.toLocaleString('id-ID')}*\nMetode: *${due.paymentMethod || 'Tunai'}*\nTanggal Bayar: *${receiptDate}*\nStatus: *LUNAS*\n\nTerima kasih atas kedisiplinan dan dukungannya untuk kemajuan atlet Akademi Smart! 🏐✨`;
 
   const waUrl = member.phone ? generateDirectWhatsAppUrl(member.phone, waReceiptText) : '#';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xs">
-      <div className="bg-smart-card border border-smart-border rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl shadow-black/80 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xs print:fixed print:inset-0 print:z-[99999] print:bg-white print:p-0 print:m-0 print:flex print:items-center print:justify-center print:overflow-visible">
+      <div className="bg-smart-card border border-smart-border rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl shadow-black/80 animate-in fade-in zoom-in-95 duration-150 print:bg-transparent print:border-none print:shadow-none print:max-w-xl print:w-full print:m-0 print:p-0">
         {/* Header Actions */}
         <div className="flex items-center justify-between p-4 border-b border-smart-border bg-smart-dark/50 print:hidden">
           <div className="flex items-center gap-2 text-white font-semibold text-sm">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
             <span>Kuitansi Kas Digital</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            <Button
+              variant="primary"
+              size="xs"
+              onClick={handleDownloadPdf}
+              isLoading={isGeneratingPdf}
+              icon={<FileText className="w-3.5 h-3.5" />}
+              title="Cetak & Unduh Kuitansi PDF"
+            >
+              Cetak PDF
+            </Button>
             <Button variant="secondary" size="xs" onClick={handlePrint} icon={<Printer className="w-3.5 h-3.5" />}>
-              Cetak
+              Print
             </Button>
             {member.phone && (
               <a

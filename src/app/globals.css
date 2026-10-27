@@ -45,32 +45,104 @@ body {
 }
 
 @media print {
-  body {
-    background: #ffffff !important;
-    color: #000000 !important;
+  @page {
+    margin: 10mm;
+    size: auto;
   }
 
-  /* KTA Digital & Receipt print adjustments */
-  .printable-kta,
-  .printable-receipt {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 12pt;
+  }
+
+  /* Force exact color reproduction for card gradients & borders */
+  *,
+  *::before,
+  *::after {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  body:has(.printable-kta) * {
-    visibility: hidden;
+  /* Hide navigation, sidebars, alerts and print-hidden elements */
+  header,
+  aside,
+  nav,
+  .print\:hidden {
+    display: none !important;
   }
 
-  body:has(.printable-kta) .printable-kta,
-  body:has(.printable-kta) .printable-kta * {
-    visibility: visible;
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  /* General Table & Card print adjustments for financial reports */
+  .bg-smart-card {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+
+  .text-white {
+    color: #0f172a !important;
+  }
+
+  .text-slate-400,
+  .text-slate-500 {
+    color: #475569 !important;
+  }
+
+  thead.bg-smart-dark\/80 {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+  }
+
+  /* Financial report table print un-clipping */
+  .overflow-x-auto,
+  .overflow-hidden {
+    overflow: visible !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* KTA Digital print adjustments */
+  body:has(.printable-kta) {
+    background: #ffffff !important;
+    overflow: visible !important;
   }
 
   body:has(.printable-kta) .printable-kta {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    margin: 0 auto !important;
     box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Receipt print adjustments */
+  body:has(.printable-receipt) {
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  body:has(.printable-receipt) .printable-receipt {
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 12px !important;
   }
 }

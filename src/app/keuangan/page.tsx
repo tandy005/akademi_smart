@@ -13,6 +13,8 @@ import {
   Filter,
   Trash2,
   AlertCircle,
+  FileText,
+  Download,
 } from 'lucide-react';
 import { CashTransaction } from '@/lib/types';
 import {
@@ -44,6 +46,7 @@ export default function KeuanganPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Form State
@@ -139,6 +142,225 @@ export default function KeuanganPage() {
     }
   };
 
+  // Export Laporan Keuangan ke Dokumen PDF Resmi
+  const handleDownloadPdf = async () => {
+    if (transactions.length === 0) {
+      alert('Tidak ada data transaksi untuk diunduh.');
+      return;
+    }
+    setIsExportingPdf(true);
+    try {
+      const { jsPDF } = await import('jspdf');
+      const autoTable = (await import('jspdf-autotable')).default;
+
+      // Inisialisasi dokumen A4 Portrait
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pageWidth = doc.internal.pageSize.getWidth(); // 210 mm
+      const todayDate = new Date().toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+
+      // Label Periode Transaksi
+      let periodeText = 'Semua Periode Transaksi';
+      if (selectedMonth) {
+        const [year, month] = selectedMonth.split('-');
+        const monthNames = [
+          '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        periodeText = `Periode: Bulan ${monthNames[parseInt(month, 10)]} ${year}`;
+      }
+      if (selectedType !== 'ALL') {
+        periodeText += ` (${selectedType === 'INCOME' ? 'Pemasukan Saja' : 'Pengeluaran Saja'})`;
+      }
+
+      // 1. Header Banner / Kop Surat Resmi
+      doc.setFillColor(143, 0, 0); // Maroon #8F0000
+      doc.rect(0, 0, pageWidth, 24, 'F');
+
+      doc.setTextColor(255, 200, 61); // Emas #FFC83D
+      doc.setFontSize(15);
+      doc.setFont('helvetica', 'bold');
+      doc.text('AKADEMI VOLY SMART 09', 14, 11);
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text('LAPORAN RESMI ARUS KAS & PEMBUKUAN KEUANGAN', 14, 18);
+
+      doc.setFontSize(8);
+      doc.text(`Tgl Cetak: ${todayDate}`, pageWidth - 14, 15, { align: 'right' });
+
+      // 2. Info Periode & Ringkasan 3 Stat Card
+      doc.setTextColor(15, 23, 42); // slate-900
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text(periodeText, 14, 34);
+
+      // Card 1: Saldo Kas Terkini
+      doc.setFillColor(254, 252, 232); // gold light
+      doc.setDrawColor(234, 179, 8);
+      doc.roundedRect(14, 38, 58, 18, 2, 2, 'FD');
+      doc.setFontSize(7.5);
+      doc.setTextColor(133, 77, 14);
+      doc.setFont('helvetica', 'normal');
+      doc.text('TOTAL SALDO KAS BERSIH', 18, 44);
+      doc.setFontSize(10.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Rp ${balanceData.currentBalance.toLocaleString('id-ID')}`, 18, 52);
+
+      // Card 2: Total Pemasukan
+      doc.setFillColor(240, 253, 244); // green light
+      doc.setDrawColor(34, 197, 94);
+      doc.roundedRect(76, 38, 58, 18, 2, 2, 'FD');
+      doc.setFontSize(7.5);
+      doc.setTextColor(22, 101, 52);
+      doc.setFont('helvetica', 'normal');
+      doc.text('TOTAL PEMASUKAN', 80, 44);
+      doc.setFontSize(10.5);
+      doc.setFont('helvetica', 'bold');
+      const incVal = selectedMonth ? balanceData.filteredIncome : balanceData.totalIncomeAll;
+      doc.text(`+ Rp ${incVal.toLocaleString('id-ID')}`, 80, 52);
+
+      // Card 3: Total Pengeluaran
+      doc.setFillColor(254, 242, 242); // red light
+      doc.setDrawColor(239, 68, 68);
+      doc.roundedRect(138, 38, 58, 18, 2, 2, 'FD');
+      doc.setFontSize(7.5);
+      doc.setTextColor(153, 27, 27);
+      doc.setFont('helvetica', 'normal');
+      doc.text('TOTAL PENGELUARAN', 142, 44);
+      doc.setFontSize(10.5);
+      doc.setFont('helvetica', 'bold');
+      const expVal = selectedMonth ? balanceData.filteredExpense : balanceData.totalExpenseAll;
+      doc.text(`- Rp ${expVal.toLocaleString('id-ID')}`, 142, 52);
+
+      // 3. Tabel Data Transaksi Keuangan
+      const tableRows = transactions.map((tx, idx) => [
+        (idx + 1).toString(),
+        tx.date,
+        tx.receiptNumber || '-',
+        tx.description,
+        tx.category,
+        tx.type === 'INCOME' ? 'Masuk' : 'Keluar',
+        `${tx.type === 'INCOME' ? '+' : '-'} Rp ${tx.amount.toLocaleString('id-ID')}`,
+        tx.recordedBy || 'Bendahara',
+      ]);
+
+      autoTable(doc, {
+        startY: 61,
+        head: [['No', 'Tanggal', 'No. Bukti', 'Uraian Transaksi', 'Kategori', 'Tipe', 'Nominal (Rp)', 'Petugas']],
+        body: tableRows,
+        styles: {
+          fontSize: 8,
+          cellPadding: 2.2,
+          textColor: [30, 41, 59],
+        },
+        headStyles: {
+          fillColor: [143, 0, 0],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          halign: 'left',
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252],
+        },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 8 },
+          1: { cellWidth: 20 },
+          2: { cellWidth: 24, font: 'courier' },
+          3: { cellWidth: 'auto' },
+          4: { cellWidth: 24 },
+          5: { halign: 'center', cellWidth: 16 },
+          6: { halign: 'right', fontStyle: 'bold', cellWidth: 28 },
+          7: { cellWidth: 22 },
+        },
+        didParseCell: (data) => {
+          if (data.section === 'body' && data.column.index === 6) {
+            const rawText = data.cell.raw as string;
+            if (rawText.startsWith('+')) {
+              data.cell.styles.textColor = [22, 101, 52];
+            } else {
+              data.cell.styles.textColor = [185, 28, 28];
+            }
+          }
+        },
+      });
+
+      // 4. Pengesahan & Tanda Tangan
+      const finalY = (doc as any).lastAutoTable?.finalY || 180;
+      let signY = finalY + 12;
+
+      // Jaga agar tidak terpotong di akhir halaman
+      if (signY + 45 > 280) {
+        doc.addPage();
+        signY = 25;
+      }
+
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Sidoarjo, ${todayDate}`, pageWidth - 60, signY);
+
+      doc.text('Mengetahui / Memeriksa,', 20, signY + 6);
+      doc.text('Ketua Akademi Smart', 20, signY + 11);
+      doc.line(20, signY + 32, 65, signY + 32);
+      doc.setFont('helvetica', 'bold');
+      doc.text('( Pembina / Ketua )', 20, signY + 37);
+
+      doc.setFont('helvetica', 'normal');
+      doc.text('Dicatat Oleh,', pageWidth - 60, signY + 6);
+      doc.text('Bendahara Kas', pageWidth - 60, signY + 11);
+      doc.line(pageWidth - 60, signY + 32, pageWidth - 15, signY + 32);
+      doc.setFont('helvetica', 'bold');
+      doc.text('( Bendahara Smart )', pageWidth - 60, signY + 37);
+
+      // Download file PDF
+      const filename = `Laporan_Keuangan_Akademi_Smart_${selectedMonth || 'Semua'}.pdf`;
+      doc.save(filename);
+    } catch (err) {
+      console.error('Gagal membuat PDF Laporan Keuangan:', err);
+      alert('Terjadi kesalahan saat mengunduh PDF laporan keuangan.');
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
+  // Export Data ke Format CSV / Excel
+  const handleDownloadCsv = () => {
+    if (transactions.length === 0) {
+      alert('Tidak ada data transaksi untuk diexport.');
+      return;
+    }
+    const headers = ['No', 'Tanggal', 'No. Bukti', 'Uraian Transaksi', 'Kategori', 'Tipe', 'Nominal', 'Petugas'];
+    const rows = transactions.map((tx, idx) => [
+      idx + 1,
+      `"${tx.date}"`,
+      `"${tx.receiptNumber || '-'}"`,
+      `"${(tx.description || '').replace(/"/g, '""')}"`,
+      `"${tx.category}"`,
+      tx.type === 'INCOME' ? 'Pemasukan' : 'Pengeluaran',
+      tx.amount,
+      `"${tx.recordedBy || 'Bendahara'}"`,
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Laporan_Keuangan_Akademi_Smart_${selectedMonth || 'Semua'}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -153,14 +375,36 @@ export default function KeuanganPage() {
           title="Laporan Keuangan Kas Akademi Smart"
           subtitle="Transparansi pembukuan kas masuk (iuran, pendaftaran, sponsor) dan kas keluar (sewa lapangan, bola voli, honor pelatih)"
           actions={
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleDownloadPdf}
+                isLoading={isExportingPdf}
+                icon={<FileText className="w-4 h-4" />}
+                title="Download Dokumen PDF Laporan Keuangan Resmi"
+              >
+                Download PDF
+              </Button>
+
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleDownloadCsv}
+                icon={<Download className="w-4 h-4" />}
+                title="Export Data ke Excel / CSV"
+              >
+                Export Excel
+              </Button>
+
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={handlePrint}
                 icon={<Printer className="w-4 h-4" />}
+                title="Cetak via Printer Browser"
               >
-                Cetak Laporan
+                Cetak
               </Button>
 
               {role !== 'MEMBER' && (
